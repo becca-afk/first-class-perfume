@@ -103,6 +103,9 @@ app.post("/api/mpesa/request", async (req, res) => {
       ? "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
       : "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
 
+    const host = req.get('host');
+    const callbackUrl = `https://${host}/api/mpesa/callback`;
+
     const data = {
       BusinessShortCode: shortCode,
       Password: password,
@@ -112,7 +115,7 @@ app.post("/api/mpesa/request", async (req, res) => {
       PartyA: phone,
       PartyB: shortCode,
       PhoneNumber: phone,
-      CallBackURL: "https://first-class-perfume.onrender.com/api/mpesa/callback",
+      CallBackURL: callbackUrl,
       AccountReference: "FirstClassPerfume",
       TransactionDesc: "Payment for Perfume"
     };
