@@ -65,7 +65,10 @@ app.post("/api/contact", (req, res) => {
 const getAccessToken = async () => {
   const consumer_key = process.env.MPESA_CONSUMER_KEY;
   const consumer_secret = process.env.MPESA_CONSUMER_SECRET;
-  const url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
+  const mpesa_env = process.env.MPESA_ENV || "sandbox";
+  const url = mpesa_env === "production"
+    ? "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+    : "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
   const auth = "Basic " + Buffer.from(consumer_key + ":" + consumer_secret).toString("base64");
   try {
     const response = await axios.get(url, { headers: { Authorization: auth } });
@@ -94,7 +97,10 @@ app.post("/api/mpesa/request", async (req, res) => {
     const passkey = process.env.MPESA_PASSKEY;
     const password = Buffer.from(shortCode + passkey + timestamp).toString("base64");
 
-    const stk_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
+    const mpesa_env = process.env.MPESA_ENV || "sandbox";
+    const stk_url = mpesa_env === "production"
+      ? "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
+      : "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
     const data = {
       BusinessShortCode: shortCode,
       Password: password,
