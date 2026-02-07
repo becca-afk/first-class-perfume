@@ -98,19 +98,21 @@ app.post("/api/mpesa/request", async (req, res) => {
     const password = Buffer.from(shortCode + passkey + timestamp).toString("base64");
 
     const mpesa_env = process.env.MPESA_ENV || "sandbox";
+    const transaction_type = process.env.MPESA_TRANSACTION_TYPE || "CustomerPayBillOnline";
     const stk_url = mpesa_env === "production"
       ? "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
       : "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
+
     const data = {
       BusinessShortCode: shortCode,
       Password: password,
       Timestamp: timestamp,
-      TransactionType: "CustomerPayBillOnline",
-      Amount: Math.round(amount), // API requires integer
+      TransactionType: transaction_type,
+      Amount: Math.round(amount),
       PartyA: phone,
       PartyB: shortCode,
       PhoneNumber: phone,
-      CallBackURL: "https://example.com/api/mpesa/callback", // Replace with real callback in prod
+      CallBackURL: "https://first-class-perfume.onrender.com/api/mpesa/callback",
       AccountReference: "FirstClassPerfume",
       TransactionDesc: "Payment for Perfume"
     };
@@ -118,15 +120,21 @@ app.post("/api/mpesa/request", async (req, res) => {
     const response = await axios.post(stk_url, data, { headers: { Authorization: "Bearer " + token } });
     console.log("STK Push Response:", response.data);
 
-    // Safaricom returns "ResponseCode": "0" for success
     if (response.data.ResponseCode === "0") {
       res.json({ Success: true, message: "Prompt sent", data: response.data });
     } else {
-      res.status(500).json({ Success: false, errorMessage: response.data.CustomerMessage || "Failed" });
+      res.status(500).json({ Success: false, errorMessage: `Safaricom Error: ${response.data.ResponseDescription}` });
     }
   } catch (error) {
-    console.error("STK Push Error:", error.response ? error.response.data : error.message);
-    res.status(500).json({ Success: false, errorMessage: "M-Pesa request failed. Please check your credentials and try again." });
+    const errorData = error.response ? error.response.data : error.message;
+    console.error("STK Push Error:", errorData);
+
+    let userMessage = "M-Pesa request failed.";
+    if (error.response && error.response.data) {
+      userMessage = `Safaricom says: ${error.response.data.errorMessage || error.response.data.ResponseDescription || "Invalid credentials or request"}`;
+    }
+
+    res.status(500).json({ Success: false, errorMessage: userMessage });
   }
 });
 
