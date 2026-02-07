@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>First Class Perfume | Luxury Fragrances & Gifts</title>
+  <meta name="description"
+    content="Discover curated luxury perfumes for women and men in Kenya. Shop sophisticated golden fragrances. Pay easily with M-Pesa. Delivery available.">
+  <meta name="keywords"
+    content="perfume, luxury fragrance, kenya perfume, m-pesa perfume shop, gold jaguar perfume, first class perfume">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://firstclassperfume.com/">
+  <meta property="og:title" content="First Class Perfume | Luxury Fragrances">
+  <meta property="og:description"
+    content="Discover curated luxury perfumes for women and men. Shop sophisticated golden fragrances. Pay with M-Pesa.">
+  <meta property="og:image" content="https://firstclassperfume.com/images/jaguar-3d.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="First Class Perfume | Luxury Fragrances">
+  <meta property="twitter:description"
+    content="Discover curated luxury perfumes for women and men. Shop sophisticated golden fragrances.">
+  <meta property="twitter:image" content="https://firstclassperfume.com/images/jaguar-3d.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <!-- Intro: Simple brand name in cursive -->
+  <div class="intro" id="intro" aria-hidden="false">
+    <div class="intro-brand-wrap">
+      <h1 class="intro-brand-text" id="intro-brand-text">First Class Perfume</h1>
+    </div>
+    <div class="intro-enter-wrap">
+      <button type="button" class="intro-enter-btn" id="intro-enter-btn">Enter</button>
+    </div>
+  </div>
+
+  <!-- Main site: luxury, rich, old money -->
+  <div class="site-main" id="site-main" aria-hidden="true">
+    <header class="header">
+      <div class="header-inner">
+        <a href="/" class="logo">
+          <img src="images/logo-stylized.png" alt="First Class Perfume" class="logo-img" width="120" height="auto">
+        </a>
+        <nav class="nav">
+          <button type="button" class="nav-link active" data-filter="all">All</button>
+          <button type="button" class="nav-link" data-filter="women">Women</button>
+          <button type="button" class="nav-link" data-filter="men">Men</button>
+        </nav>
+        <div class="header-actions">
+          <button type="button" class="icon-btn" id="wishlist-btn" aria-label="Wishlist">
+            <span class="icon-heart"></span>
+            <span class="badge" id="wishlist-count">0</span>
+          </button>
+          <button type="button" class="icon-btn" id="cart-btn" aria-label="Cart">
+            <span class="icon-cart"></span>
+            <span class="badge" id="cart-count">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero luxury-hero">
+        <div class="hero-content">
+          <h1>Luxury Fragrances</h1>
+          <p>Curated women's and men's perfumes. Discover, wishlist, order. Pay with M-Pesa.</p>
+        </div>
+      </section>
+
+      <section class="products-section">
+        <div class="container">
+          <div class="products-grid" id="products-grid"></div>
+          <p class="empty-state" id="empty-state" hidden>No products in this category.</p>
+        </div>
+      </section>
+    </main>
+
+    <div class="modal" id="product-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+      <div class="modal-backdrop" id="modal-backdrop"></div>
+      <div class="modal-content">
+        <button type="button" class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+        <div class="modal-body" id="modal-body"></div>
+      </div>
+    </div>
+
+    <div class="drawer" id="wishlist-drawer" aria-hidden="true">
+      <div class="drawer-backdrop" id="wishlist-backdrop"></div>
+      <div class="drawer-panel">
+        <div class="drawer-header">
+          <h2>Wishlist</h2>
+          <button type="button" class="drawer-close" id="wishlist-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="drawer-body" id="wishlist-body"></div>
+      </div>
+    </div>
+
+    <div class="drawer" id="cart-drawer" aria-hidden="true">
+      <div class="drawer-backdrop" id="cart-backdrop"></div>
+      <div class="drawer-panel">
+        <div class="drawer-header">
+          <h2>Cart</h2>
+          <button type="button" class="drawer-close" id="cart-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="drawer-body" id="cart-body"></div>
+        <div class="drawer-footer" id="cart-footer">
+          <p class="cart-total">Total: <strong id="cart-total">KES 0</strong></p>
+          <button type="button" class="btn btn-primary" id="checkout-btn">Checkout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- M-Pesa checkout step (inside cart or as overlay) -->
+    <div class="mpesa-overlay" id="mpesa-overlay" hidden>
+      <div class="mpesa-box">
+        <h3>Pay with M-Pesa</h3>
+        <p class="mpesa-amount" id="mpesa-amount">KES 0</p>
+        <label for="mpesa-phone">Phone number (254...)</label>
+        <input type="tel" id="mpesa-phone" placeholder="254712345678" maxlength="12">
+        <p class="mpesa-feedback" id="mpesa-feedback" role="status"></p>
+        <div class="mpesa-actions">
+          <button type="button" class="btn btn-outline" id="mpesa-cancel">Cancel</button>
+          <button type="button" class="btn btn-primary" id="mpesa-pay">Pay now</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; First Class Perfume. Luxury fragrances.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

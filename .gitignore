@@ -1,0 +1,10 @@
+node_modules/
+.env
+*.zip
+*.log
+scripts/image-mapping.example.json
+download-images.js
+download-images-corrected.js
+image-fix-needed.js
+build-and-zip.ps1
+data/order-history.json

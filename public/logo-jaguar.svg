@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" fill="none" stroke="#c9a86c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <!-- Stretching jaguar above "First Class Perfume" -->
+  <!-- Head -->
+  <ellipse cx="22" cy="28" rx="11" ry="9"/>
+  <circle cx="26" cy="27" r="2.5" fill="#c9a86c"/>
+  <path d="M10 20 L12 14 L16 20 Z" fill="#c9a86c"/>
+  <path d="M8 28 L4 28"/>
+  <!-- Body (elongated, stretching) -->
+  <path d="M32 27 L55 26 L80 25 L105 25 L130 26 L155 27 L178 26"/>
+  <!-- Front legs forward -->
+  <path d="M48 26 L42 36 L38 46"/>
+  <path d="M58 26 L52 36 L48 46"/>
+  <!-- Back legs back -->
+  <path d="M132 26 L138 36 L142 46"/>
+  <path d="M142 26 L148 36 L152 46"/>
+  <!-- Tail -->
+  <path d="M178 26 L192 22 L200 26"/>
+</svg>
