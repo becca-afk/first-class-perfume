@@ -1,18 +1,23 @@
 :root {
-  --bg: #000000;
-  --bg-card: #2a2520;
-  --bg-elevated: #3a3530;
-  --text: #e8e6e3;
-  --text-muted: #a8a39e;
-  --accent: #8b7355;
-  --accent-hover: #a08968;
-  --accent-subtle: rgba(139, 115, 85, 0.15);
-  --border: #4a4540;
-  --radius: 2px;
+  --bg: #e3f2fd;
+  /* Soft baby blue */
+  --bg-card: #ffffff;
+  /* Clean white cards */
+  --bg-elevated: #f5fafd;
+  --text: #1a2a40;
+  /* Rich navy blue text */
+  --text-muted: #546e7a;
+  --accent: #1e88e5;
+  /* Professional blue accent */
+  --accent-hover: #1565c0;
+  --accent-subtle: rgba(30, 136, 229, 0.1);
+  --border: #bbdefb;
+  --radius: 8px;
+  /* Slightly rounder for a friendlier feel */
   --font-serif: "Playfair Display", Georgia, serif;
   --font-sans: "Montserrat", system-ui, sans-serif;
-  --shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  --transition: 0.3s ease;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Intro: brand pop, jaguar walk, tail lay */
