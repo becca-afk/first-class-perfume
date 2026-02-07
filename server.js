@@ -120,11 +120,7 @@ app.post("/api/mpesa/request", async (req, res) => {
     }
   } catch (error) {
     console.error("STK Push Error:", error.response ? error.response.data : error.message);
-    // Fallback simulation for when credentials are invalid/missing (so user can still test UI)
-    console.log("Falling back to simulation mode due to error...");
-    setTimeout(() => {
-      res.json({ Success: true, message: "SIMULATION: Prompt Sent (Check Server Logs for Setup)", simulation: true });
-    }, 1000);
+    res.status(500).json({ Success: false, errorMessage: "M-Pesa request failed. Please check your credentials and try again." });
   }
 });
 

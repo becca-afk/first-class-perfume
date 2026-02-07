@@ -393,28 +393,16 @@
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data.Success) {
-          if (data.simulation) {
-            feedback.textContent = "⚠️ SIMULATION MODE: Credentials missing in .env";
-            feedback.style.color = "orange";
-          } else {
-            feedback.textContent = "Prompt sent! Check your phone.";
-            feedback.classList.remove("error");
-          }
+          feedback.textContent = "Prompt sent! Check your phone.";
+          feedback.classList.remove("error");
 
-          // Manual confirmation for demo/sandbox purposes
-          var btn = document.createElement("button");
-          btn.className = "btn btn-primary";
-          btn.style.marginTop = "1rem";
-          btn.textContent = "I have completed payment";
-          btn.onclick = function () {
-            feedback.textContent = "Payment confirmed. Thank you!";
+          // Clear cart after a delay to allow user to see the success message
+          setTimeout(function () {
             setCart([]);
             closeDrawer("cart-drawer");
             closeMpesa();
             showToast("Order placed successfully!");
-          };
-          feedback.appendChild(document.createElement("br"));
-          feedback.appendChild(btn);
+          }, 5000);
         } else {
           feedback.textContent = data.errorMessage || "Request failed. Try again.";
           feedback.classList.add("error");
