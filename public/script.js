@@ -63,6 +63,10 @@
   }
 
   function imageUrl(p) {
+    // Use the mapping if available, otherwise fallback to default
+    if (PERFUME_IMAGE_MAP && PERFUME_IMAGE_MAP[p.id]) {
+      return PERFUME_IMAGE_MAP[p.id];
+    }
     return "/images/products/" + p.id + ".jpg";
   }
 
