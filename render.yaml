@@ -1,0 +1,30 @@
+services:
+  # Web Service
+  - type: web
+    name: firstclass-perfume
+    env: node
+    plan: free
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+    healthCheckPath: /
+    
+  # Static File Service (for images)
+  - type: web
+    name: perfume-images
+    env: static
+    plan: free
+    buildCommand: "npm install"
+    staticPublishPath: ./public
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+databases:
+  # No database needed for this simple site
+
+version: "1"

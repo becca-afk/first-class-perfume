@@ -63,7 +63,7 @@
   }
 
   function imageUrl(p) {
-    return "/images/" + p.id + ".jpg";
+    return "/images/products/" + p.id + ".jpg";
   }
 
   function perfumeBottleSvg(name, w, h) {
