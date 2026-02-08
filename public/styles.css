@@ -20,7 +20,7 @@
   --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Intro: brand pop, jaguar walk, tail lay */
+/* Intro: seamless black theme */
 .intro {
   position: fixed;
   inset: 0;
@@ -60,6 +60,9 @@
 .intro-brand-wrap {
   position: relative;
   text-align: center;
+  background: #000000;
+  padding: 2rem;
+  border-radius: var(--radius);
 }
 
 .intro-logo {
@@ -69,6 +72,9 @@
   opacity: 0;
   transform: scale(0.9);
   animation: logoPop 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  background: #000000;
+  padding: 1rem;
+  border-radius: var(--radius);
 }
 
 @keyframes logoPop {
