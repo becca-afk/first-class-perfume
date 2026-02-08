@@ -61,6 +61,22 @@ app.post("/api/contact", (req, res) => {
   res.json({ success: true });
 });
 
+// M-Pesa Configuration Test
+app.get("/api/mpesa/test", (req, res) => {
+  res.json({
+    configured: {
+      consumer_key: !!process.env.MPESA_CONSUMER_KEY,
+      consumer_secret: !!process.env.MPESA_CONSUMER_SECRET,
+      shortcode: !!process.env.MPESA_SHORTCODE,
+      passkey: !!process.env.MPESA_PASSKEY,
+      env: process.env.MPESA_ENV || "sandbox"
+    },
+    message: process.env.MPESA_CONSUMER_KEY ? 
+      "M-Pesa is configured" : 
+      "M-Pesa credentials missing - check .env file"
+  });
+});
+
 // M-Pesa Daraja API Implementation
 const getAccessToken = async () => {
   const consumer_key = process.env.MPESA_CONSUMER_KEY;
@@ -82,6 +98,16 @@ const getAccessToken = async () => {
 app.post("/api/mpesa/request", async (req, res) => {
   const { phone, amount } = req.body || {};
   if (!phone || !amount) return res.status(400).json({ success: false, message: "Missing phone or amount" });
+
+  // Debug logging
+  console.log("M-Pesa Request:", { phone, amount });
+  console.log("Environment:", {
+    consumer_key: process.env.MPESA_CONSUMER_KEY ? "SET" : "MISSING",
+    consumer_secret: process.env.MPESA_CONSUMER_SECRET ? "SET" : "MISSING", 
+    shortcode: process.env.MPESA_SHORTCODE,
+    passkey: process.env.MPESA_PASSKEY ? "SET" : "MISSING",
+    env: process.env.MPESA_ENV
+  });
 
   try {
     const token = await getAccessToken();
@@ -119,6 +145,8 @@ app.post("/api/mpesa/request", async (req, res) => {
       AccountReference: "FirstClassPerfume",
       TransactionDesc: "Payment for Perfume"
     };
+
+    console.log("Sending to M-Pesa:", { stk_url, data: { ...data, Password: "***" } });
 
     const response = await axios.post(stk_url, data, { headers: { Authorization: "Bearer " + token } });
     console.log("STK Push Response:", response.data);
