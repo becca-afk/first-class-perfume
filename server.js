@@ -51,6 +51,11 @@ app.get("/admin.html", authMiddleware, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
+// Simple admin page - no authentication required for easy access
+app.get("/simple-admin.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "simple-admin.html"));
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
