@@ -161,20 +161,29 @@ a:hover {
   color: var(--accent-hover);
 }
 
-/* Header - Blue theme to match site */
+/* Header - Blue theme to match site, auto-hiding */
 .header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   background: var(--bg);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
+  transform: translateY(0);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.header.hidden {
+  transform: translateY(-100%);
+  opacity: 0;
 }
 
 .header-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0.5rem 1.5rem;
+  padding: 0.4rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -293,7 +302,7 @@ a:hover {
 
 /* Hero: luxury, old money */
 .hero {
-  padding: 4rem 1.5rem;
+  padding: 6rem 1.5rem 4rem;
   text-align: center;
   background: var(--bg);
   border-bottom: 1px solid var(--border);

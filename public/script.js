@@ -7,6 +7,39 @@
   let products = [];
   let currentFilter = "all";
 
+  // Auto-hiding navigation
+  let lastScrollY = window.scrollY;
+  let ticking = false;
+
+  function updateHeaderVisibility() {
+    const header = document.querySelector('.header');
+    if (!header) return;
+
+    const currentScrollY = window.scrollY;
+    
+    if (currentScrollY > lastScrollY && currentScrollY > 100) {
+      // Scrolling down - hide header
+      header.classList.add('hidden');
+    } else {
+      // Scrolling up or at top - show header
+      header.classList.remove('hidden');
+    }
+    
+    lastScrollY = currentScrollY;
+  }
+
+  function onScroll() {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        updateHeaderVisibility();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+
   function getRatings() {
     try {
       return JSON.parse(localStorage.getItem(STORAGE_KEYS.ratings) || "{}");
