@@ -10,27 +10,37 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Family-Only Access Middleware
-const basicAuth = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    res.setHeader("WWW-Authenticate", 'Basic realm="Family Access"');
-    return res.status(401).send("Authentication required");
+// Simple authentication middleware
+const authMiddleware = (req, res, next) => {
+  const auth = req.headers.authorization;
+  if (!auth) {
+    res.setHeader('WWW-Authenticate', 'Basic realm="Admin Area"');
+    return res.status(401).json({ error: 'Authentication required' });
   }
-
-  const auth = Buffer.from(authHeader.split(" ")[1], "base64").toString().split(":");
-  const user = auth[0];
-  const pass = auth[1];
-
-  const expectedUser = process.env.SITE_USER || "family";
-  const expectedPass = process.env.SITE_PASSWORD || "perfume2026";
-
-  if (user === expectedUser && pass === expectedPass) {
-    next();
-  } else {
-    res.setHeader("WWW-Authenticate", 'Basic realm="Family Access"');
-    return res.status(401).send("Authentication failed");
+  
+  const [type, credentials] = auth.split(' ');
+  if (type !== 'Basic') {
+    return res.status(401).json({ error: 'Basic authentication required' });
   }
+  
+  const [username, password] = Buffer.from(credentials, 'base64').toString().split(':');
+  
+  // Multiple admin users
+  const validUsers = [
+    { username: 'family', password: 'perfume2026' },
+    { username: 'admin', password: 'admin123' },
+    { username: 'friend', password: 'friend2026' }
+  ];
+  
+  const isValidUser = validUsers.some(user => 
+    user.username === username && user.password === password
+  );
+  
+  if (!isValidUser) {
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
+  
+  next();
 };
 
 // Protect all routes
