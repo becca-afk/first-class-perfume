@@ -15,12 +15,12 @@ const authMiddleware = (req, res, next) => {
   const auth = req.headers.authorization;
   if (!auth) {
     res.setHeader('WWW-Authenticate', 'Basic realm="Admin Area"');
-    return res.status(401).json({ error: 'Authentication required' });
+    return res.status(401).send('Authentication required');
   }
   
   const [type, credentials] = auth.split(' ');
   if (type !== 'Basic') {
-    return res.status(401).json({ error: 'Basic authentication required' });
+    return res.status(401).send('Basic authentication required');
   }
   
   const [username, password] = Buffer.from(credentials, 'base64').toString().split(':');
@@ -37,7 +37,7 @@ const authMiddleware = (req, res, next) => {
   );
   
   if (!isValidUser) {
-    return res.status(401).json({ error: 'Invalid credentials' });
+    return res.status(401).send('Invalid credentials');
   }
   
   next();
