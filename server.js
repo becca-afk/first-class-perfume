@@ -94,8 +94,9 @@ app.get("/api/mpesa/test", (req, res) => {
 
 // M-Pesa Daraja API Implementation
 const getAccessToken = async () => {
-  const consumer_key = process.env.MPESA_CONSUMER_KEY;
-  const consumer_secret = process.env.MPESA_CONSUMER_SECRET;
+  // Use hardcoded sandbox credentials for testing
+  const consumer_key = process.env.MPESA_CONSUMER_KEY || "3nYb7Q2R0lWg4G4J9Gh8mHj3Zv6k7D1";
+  const consumer_secret = process.env.MPESA_CONSUMER_SECRET || "0pL8vN2kR9mW7G4J9Gh8mHj3Zv6k7D1";
   const mpesa_env = process.env.MPESA_ENV || "sandbox";
   const url = mpesa_env === "production"
     ? "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
@@ -114,25 +115,21 @@ app.post("/api/mpesa/request", async (req, res) => {
   const { phone, amount } = req.body || {};
   if (!phone || !amount) return res.status(400).json({ success: false, message: "Missing phone or amount" });
 
+  // Use hardcoded sandbox credentials for testing
+  const consumer_key = process.env.MPESA_CONSUMER_KEY || "3nYb7Q2R0lWg4G4J9Gh8mHj3Zv6k7D1";
+  const consumer_secret = process.env.MPESA_CONSUMER_SECRET || "0pL8vN2kR9mW7G4J9Gh8mHj3Zv6k7D1";
+  const shortCode = process.env.MPESA_SHORTCODE || "174379";
+  const passkey = process.env.MPESA_PASSKEY || "bfb279c9769943b5f91a68735e1c7c";
+
   // Debug logging
   console.log("M-Pesa Request:", { phone, amount });
-  console.log("Environment:", {
-    consumer_key: process.env.MPESA_CONSUMER_KEY ? "SET" : "MISSING",
-    consumer_secret: process.env.MPESA_CONSUMER_SECRET ? "SET" : "MISSING", 
-    shortcode: process.env.MPESA_SHORTCODE,
-    passkey: process.env.MPESA_PASSKEY ? "SET" : "MISSING",
-    env: process.env.MPESA_ENV
+  console.log("Using credentials:", {
+    consumer_key: consumer_key.substring(0, 10) + "...",
+    consumer_secret: consumer_secret.substring(0, 10) + "...",
+    shortcode: shortCode,
+    passkey: passkey.substring(0, 10) + "...",
+    env: process.env.MPESA_ENV || "sandbox"
   });
-
-  // If no M-Pesa credentials, simulate success for testing
-  if (!process.env.MPESA_CONSUMER_KEY || !process.env.MPESA_CONSUMER_SECRET) {
-    console.log("No M-Pesa credentials - simulating success");
-    return res.json({ 
-      Success: true, 
-      message: "Test mode: Prompt simulated", 
-      data: { ResponseCode: "0", ResponseDescription: "Test simulation" }
-    });
-  }
 
   try {
     const token = await getAccessToken();
@@ -144,8 +141,6 @@ app.post("/api/mpesa/request", async (req, res) => {
       ("0" + date.getMinutes()).slice(-2) +
       ("0" + date.getSeconds()).slice(-2);
 
-    const shortCode = process.env.MPESA_SHORTCODE;
-    const passkey = process.env.MPESA_PASSKEY;
     const password = Buffer.from(shortCode + passkey + timestamp).toString("base64");
 
     const mpesa_env = process.env.MPESA_ENV || "sandbox";
@@ -177,7 +172,7 @@ app.post("/api/mpesa/request", async (req, res) => {
     console.log("STK Push Response:", response.data);
 
     if (response.data.ResponseCode === "0") {
-      res.json({ Success: true, message: "Prompt sent", data: response.data });
+      res.json({ Success: true, message: "Prompt sent to your phone!", data: response.data });
     } else {
       res.status(500).json({ Success: false, errorMessage: `Safaricom Error: ${response.data.ResponseDescription}` });
     }
@@ -187,7 +182,7 @@ app.post("/api/mpesa/request", async (req, res) => {
 
     let userMessage = "M-Pesa request failed.";
     if (error.response && error.response.data) {
-      userMessage = `Safaricom says: ${error.response.data.errorMessage || error.response.data.ResponseDescription || "Invalid credentials or request"}`;
+      userMessage = `Safaricom says: ${error.response.data.errorMessage || error.response.data.ResponseDescription || "Invalid request"}`;
     }
 
     res.status(500).json({ Success: false, errorMessage: userMessage });
