@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Dashboard - First Class Perfume</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --bg-card: #ffffff;
+            --text: #2c3e50;
+            --text-muted: #6c757d;
+            --accent: #007bff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --border: #dee2e6;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            gap: 0.5rem;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-muted);
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: var(--bg);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--accent);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--text);
+            margin: 0;
+        }
+
+        .orders-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .order-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            align-items: start;
+            gap: 1rem;
+        }
+
+        .order-info h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .order-info p {
+            margin: 0.25rem 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .order-items {
+            font-size: 0.9rem;
+        }
+
+        .order-items ul {
+            margin: 0;
+            padding-left: 1.2rem;
+        }
+
+        .order-items li {
+            margin-bottom: 0.25rem;
+        }
+
+        .order-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-processing {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-shipped {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-delivered {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .order-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: var(--text);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-info {
+            background: var(--info);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .order-card {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌸 First Class Perfume Business Dashboard</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('overview')">📊 Overview</button>
+            <button class="tab" onclick="showTab('orders')">📦 Orders</button>
+            <button class="tab" onclick="showTab('products')">🛍️ Products</button>
+            <button class="tab" onclick="showTab('customers')">👥 Customers</button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-orders">0</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-revenue">KES 0</div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pending-orders">0</div>
+                    <div class="stat-label">Pending Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-customers">0</div>
+                    <div class="stat-label">Total Customers</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Recent Orders</h2>
+                </div>
+                <div class="orders-grid" id="recent-orders"></div>
+            </div>
+        </div>
+
+        <!-- Orders Tab -->
+        <div id="orders" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">All Orders</h2>
+                </div>
+                <div class="orders-grid" id="all-orders"></div>
+            </div>
+        </div>
+
+        <!-- Products Tab -->
+        <div id="products" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Product Management</h2>
+                    <button class="btn" onclick="window.location.href='/simple-admin.html'">Open Stock Manager</button>
+                </div>
+                <div class="products-grid" id="products-overview"></div>
+            </div>
+        </div>
+
+        <!-- Customers Tab -->
+        <div id="customers" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Customer Management</h2>
+                </div>
+                <div class="customers-grid" id="customers-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let orders = [];
+        let products = [];
+        let users = [];
+
+        // Load data on page load
+        window.onload = function() {
+            loadOrders();
+            loadProducts();
+            loadCustomers();
+        };
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch('/api/admin/orders', {
+                    headers: {
+                        'Authorization': 'Basic ' + btoa('family:perfume2026')
+                    }
+                });
+                const data = await response.json();
+                orders = data.orders || [];
+                renderOrders();
+                updateStats();
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                document.getElementById('all-orders').innerHTML = '<div class="loading">Error loading orders. Please refresh.</div>';
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products');
+                products = await response.json();
+                renderProductsOverview();
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        async function loadCustomers() {
+            try {
+                const response = await fetch('/api/data/users.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    users = data.users || [];
+                    renderCustomers();
+                }
+            } catch (error) {
+                console.error('Error loading customers:', error);
+            }
+        }
+
+        function renderOrders() {
+            const allOrdersGrid = document.getElementById('all-orders');
+            const recentOrdersGrid = document.getElementById('recent-orders');
+
+            if (orders.length === 0) {
+                const emptyHtml = '<div class="empty-state">No orders yet. Your first order will appear here!</div>';
+                allOrdersGrid.innerHTML = emptyHtml;
+                recentOrdersGrid.innerHTML = emptyHtml;
+                return;
+            }
+
+            const orderHtml = orders.map(order => {
+                const statusClass = `status-${order.status}`;
+                const itemsList = order.items ? order.items.map(item => 
+                    `<li>${item.name} (x${item.quantity}) - KES ${item.price}</li>`
+                ).join('') : '<li>No items</li>';
+
+                return `
+                    <div class="order-card">
+                        <div class="order-info">
+                            <h4>Order #${order.id}</h4>
+                            <p><strong>Customer:</strong> ${order.customer?.name || 'N/A'}</p>
+                            <p><strong>Email:</strong> ${order.customer?.email || 'N/A'}</p>
+                            <p><strong>Phone:</strong> ${order.phone || 'N/A'}</p>
+                            <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
+                        </div>
+                        <div class="order-items">
+                            <strong>Items:</strong>
+                            <ul>${itemsList}</ul>
+                            <p><strong>Total:</strong> KES ${order.total?.toLocaleString() || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <span class="order-status ${statusClass}">${order.status}</span>
+                        </div>
+                        <div class="order-actions">
+                            ${getStatusButtons(order)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            allOrdersGrid.innerHTML = orderHtml;
+            
+            // Show only recent orders (last 5)
+            const recentOrders = orders.slice(-5).reverse();
+            recentOrdersGrid.innerHTML = recentOrders.map(order => {
+                const statusClass = `status-${order.status}`;
+                return `
+                    <div class="order-card">
+                        <div class="order-info">
+                            <h4>Order #${order.id}</h4>
+                            <p><strong>Customer:</strong> ${order.customer?.name || 'N/A'}</p>
+                            <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
+                        </div>
+                        <div>
+                            <span class="order-status ${statusClass}">${order.status}</span>
+                        </div>
+                        <div class="order-actions">
+                            ${getStatusButtons(order)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getStatusButtons(order) {
+            const buttons = [];
+            
+            if (order.status === 'pending') {
+                buttons.push(`<button class="btn btn-info" onclick="updateOrderStatus(${order.id}, 'processing')">Process</button>`);
+            }
+            if (order.status === 'processing') {
+                buttons.push(`<button class="btn btn-warning" onclick="updateOrderStatus(${order.id}, 'shipped')">Ship</button>`);
+            }
+            if (order.status === 'shipped') {
+                buttons.push(`<button class="btn btn-success" onclick="updateOrderStatus(${order.id}, 'delivered')">Deliver</button>`);
+            }
+            if (order.status !== 'cancelled' && order.status !== 'delivered') {
+                buttons.push(`<button class="btn btn-danger" onclick="updateOrderStatus(${order.id}, 'cancelled')">Cancel</button>`);
+            }
+            
+            return buttons.join('');
+        }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                const response = await fetch(`/api/admin/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + btoa('family:perfume2026')
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showToast(`Order #${orderId} updated to ${newStatus}`);
+                    loadOrders(); // Reload orders
+                } else {
+                    showToast('Failed to update order: ' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error updating order:', error);
+                showToast('Error updating order', 'error');
+            }
+        }
+
+        function renderProductsOverview() {
+            const grid = document.getElementById('products-overview');
+            if (products.length === 0) {
+                grid.innerHTML = '<div class="empty-state">No products found.</div>';
+                return;
+            }
+
+            const totalStock = products.reduce((sum, p) => sum + (p.stock || 0), 0);
+            const inStock = products.filter(p => p.stock > 0).length;
+            const outOfStock = products.filter(p => p.stock === 0).length;
+
+            grid.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">${products.length}</div>
+                        <div class="stat-label">Total Products</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${inStock}</div>
+                        <div class="stat-label">In Stock</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${outOfStock}</div>
+                        <div class="stat-label">Out of Stock</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${totalStock}</div>
+                        <div class="stat-label">Total Items</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCustomers() {
+            const grid = document.getElementById('customers-list');
+            if (users.length === 0) {
+                grid.innerHTML = '<div class="empty-state">No customers registered yet.</div>';
+                return;
+            }
+
+            grid.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">${users.length}</div>
+                        <div class="stat-label">Total Customers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${users.filter(u => new Date(u.createdAt) > new Date(Date.now() - 30*24*60*60*1000)).length}</div>
+                        <div class="stat-label">New This Month</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateStats() {
+            const totalOrders = orders.length;
+            const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+            const pendingOrders = orders.filter(o => o.status === 'pending').length;
+            const totalCustomers = users.length;
+
+            document.getElementById('total-orders').textContent = totalOrders;
+            document.getElementById('total-revenue').textContent = `KES ${totalRevenue.toLocaleString()}`;
+            document.getElementById('pending-orders').textContent = pendingOrders;
+            document.getElementById('total-customers').textContent = totalCustomers;
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = type === 'error' ? 'var(--danger)' : 'var(--success)';
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

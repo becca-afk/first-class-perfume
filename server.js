@@ -17,29 +17,29 @@ const authMiddleware = (req, res, next) => {
     res.setHeader('WWW-Authenticate', 'Basic realm="Admin Area"');
     return res.status(401).send('Authentication required');
   }
-  
+
   const [type, credentials] = auth.split(' ');
   if (type !== 'Basic') {
     return res.status(401).send('Basic authentication required');
   }
-  
+
   const [username, password] = Buffer.from(credentials, 'base64').toString().split(':');
-  
+
   // Multiple admin users
   const validUsers = [
     { username: 'family', password: 'perfume2026' },
     { username: 'admin', password: 'admin123' },
     { username: 'friend', password: 'friend2026' }
   ];
-  
-  const isValidUser = validUsers.some(user => 
+
+  const isValidUser = validUsers.some(user =>
     user.username === username && user.password === password
   );
-  
+
   if (!isValidUser) {
     return res.status(401).send('Invalid credentials');
   }
-  
+
   next();
 };
 
@@ -56,6 +56,11 @@ app.get("/simple-admin.html", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "simple-admin.html"));
 });
 
+// Business dashboard - requires authentication
+app.get("/business-dashboard.html", authMiddleware, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "business-dashboard.html"));
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
@@ -70,10 +75,217 @@ app.get("/api/products", (req, res) => {
   res.json(JSON.parse(fs.readFileSync(file, "utf-8")));
 });
 
-app.post("/api/order", (req, res) => {
-  const order = { id: orders.length + 1, ...req.body };
-  orders.push(order);
-  res.json({ success: true, orderId: order.id });
+app.post("/api/order", async (req, res) => {
+  const { customer, items, total, paymentMethod, phone, shippingAddress } = req.body || {};
+  
+  if (!customer || !items || !total || !paymentMethod) {
+    return res.status(400).json({ success: false, message: "Missing required order information" });
+  }
+
+  try {
+    // Load existing orders
+    const ordersFile = path.join(__dirname, "data", "orders.json");
+    let ordersData = { orders: [], nextOrderId: 1 };
+    if (fs.existsSync(ordersFile)) {
+      ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
+    }
+
+    // Create new order
+    const newOrder = {
+      id: ordersData.nextOrderId++,
+      customer,
+      items,
+      total,
+      paymentMethod,
+      phone,
+      shippingAddress,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    // Save order
+    ordersData.orders.push(newOrder);
+    fs.writeFileSync(ordersFile, JSON.stringify(ordersData, null, 2));
+
+    console.log("New order created:", newOrder);
+    res.json({ success: true, orderId: newOrder.id, order: newOrder });
+  } catch (error) {
+    console.error("Order creation error:", error);
+    res.status(500).json({ success: false, message: "Failed to create order" });
+  }
+});
+
+// Get all orders (admin only)
+app.get("/api/admin/orders", authMiddleware, (req, res) => {
+  try {
+    const ordersFile = path.join(__dirname, "data", "orders.json");
+    if (!fs.existsSync(ordersFile)) return res.json({ orders: [] });
+    
+    const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
+    res.json(ordersData);
+  } catch (error) {
+    console.error("Error loading orders:", error);
+    res.status(500).json({ error: "Failed to load orders" });
+  }
+});
+
+// Update order status (admin only)
+app.put("/api/admin/orders/:orderId", authMiddleware, (req, res) => {
+  const { orderId } = req.params;
+  const { status } = req.body;
+
+  if (!["pending", "processing", "shipped", "delivered", "cancelled"].includes(status)) {
+    return res.status(400).json({ success: false, message: "Invalid status" });
+  }
+
+  try {
+    const ordersFile = path.join(__dirname, "data", "orders.json");
+    if (!fs.existsSync(ordersFile)) return res.status(404).json({ success: false, message: "Orders file not found" });
+    
+    const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
+    const orderIndex = ordersData.orders.findIndex(o => o.id == orderId);
+    
+    if (orderIndex === -1) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    ordersData.orders[orderIndex].status = status;
+    ordersData.orders[orderIndex].updatedAt = new Date().toISOString();
+    
+    fs.writeFileSync(ordersFile, JSON.stringify(ordersData, null, 2));
+    
+    console.log(`Order ${orderId} updated to status: ${status}`);
+    res.json({ success: true, order: ordersData.orders[orderIndex] });
+  } catch (error) {
+    console.error("Error updating order:", error);
+    res.status(500).json({ success: false, message: "Failed to update order" });
+  }
+});
+
+// User Registration
+app.post("/api/auth/register", (req, res) => {
+  const { name, email, phone, password } = req.body || {};
+  
+  if (!name || !email || !phone || !password) {
+    return res.status(400).json({ success: false, message: "All fields are required" });
+  }
+
+  try {
+    const usersFile = path.join(__dirname, "data", "users.json");
+    let usersData = { users: [], nextUserId: 1 };
+    if (fs.existsSync(usersFile)) {
+      usersData = JSON.parse(fs.readFileSync(usersFile, "utf-8"));
+    }
+
+    // Check if user already exists
+    const existingUser = usersData.users.find(u => u.email === email || u.phone === phone);
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "User with this email or phone already exists" });
+    }
+
+    // Create new user
+    const newUser = {
+      id: usersData.nextUserId++,
+      name,
+      email,
+      phone,
+      password, // In production, hash this password
+      wishlist: [],
+      createdAt: new Date().toISOString()
+    };
+
+    usersData.users.push(newUser);
+    fs.writeFileSync(usersFile, JSON.stringify(usersData, null, 2));
+
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = newUser;
+    res.json({ success: true, user: userWithoutPassword });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res.status(500).json({ success: false, message: "Registration failed" });
+  }
+});
+
+// User Login
+app.post("/api/auth/login", (req, res) => {
+  const { email, password } = req.body || {};
+  
+  if (!email || !password) {
+    return res.status(400).json({ success: false, message: "Email and password are required" });
+  }
+
+  try {
+    const usersFile = path.join(__dirname, "data", "users.json");
+    if (!fs.existsSync(usersFile)) return res.status(401).json({ success: false, message: "Invalid credentials" });
+    
+    const usersData = JSON.parse(fs.readFileSync(usersFile, "utf-8"));
+    const user = usersData.users.find(u => u.email === email && u.password === password);
+    
+    if (!user) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user;
+    res.json({ success: true, user: userWithoutPassword });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ success: false, message: "Login failed" });
+  }
+});
+
+// Get user orders
+app.get("/api/user/orders/:userId", (req, res) => {
+  const { userId } = req.params;
+  
+  try {
+    const ordersFile = path.join(__dirname, "data", "orders.json");
+    if (!fs.existsSync(ordersFile)) return res.json({ orders: [] });
+    
+    const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
+    const userOrders = ordersData.orders.filter(order => 
+      order.customer && order.customer.email === userId
+    );
+    
+    res.json({ orders: userOrders });
+  } catch (error) {
+    console.error("Error loading user orders:", error);
+    res.status(500).json({ error: "Failed to load orders" });
+  }
+});
+
+// Update wishlist
+app.post("/api/user/wishlist/:userId", (req, res) => {
+  const { userId } = req.params;
+  const { productId } = req.body || {};
+  
+  if (!productId) {
+    return res.status(400).json({ success: false, message: "Product ID is required" });
+  }
+
+  try {
+    const usersFile = path.join(__dirname, "data", "users.json");
+    if (!fs.existsSync(usersFile)) return res.status(404).json({ success: false, message: "User not found" });
+    
+    const usersData = JSON.parse(fs.readFileSync(usersFile, "utf-8"));
+    const userIndex = usersData.users.findIndex(u => u.email === userId);
+    
+    if (userIndex === -1) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const user = usersData.users[userIndex];
+    if (!user.wishlist.includes(productId)) {
+      user.wishlist.push(productId);
+    }
+    
+    fs.writeFileSync(usersFile, JSON.stringify(usersData, null, 2));
+    res.json({ success: true, wishlist: user.wishlist });
+  } catch (error) {
+    console.error("Error updating wishlist:", error);
+    res.status(500).json({ success: false, message: "Failed to update wishlist" });
+  }
 });
 
 app.post("/api/contact", (req, res) => {
@@ -83,36 +295,46 @@ app.post("/api/contact", (req, res) => {
 
 // M-Pesa Configuration Test
 app.get("/api/mpesa/test", (req, res) => {
+  const config = getMpesaConfig();
   res.json({
-    configured: {
-      consumer_key: !!process.env.MPESA_CONSUMER_KEY,
-      consumer_secret: !!process.env.MPESA_CONSUMER_SECRET,
-      shortcode: !!process.env.MPESA_SHORTCODE,
-      passkey: !!process.env.MPESA_PASSKEY,
-      env: process.env.MPESA_ENV || "sandbox"
-    },
-    message: process.env.MPESA_CONSUMER_KEY ? 
-      "M-Pesa is configured" : 
-      "M-Pesa credentials missing - check .env file"
+    status: config.consumer_key ? "Configured" : "Missing Keys",
+    environment: config.env,
+    baseUrl: config.baseUrl,
+    shortcode: config.shortCode,
+    // Show first/last 4 chars of keys for verification without exposing them fully
+    consumer_key_hint: config.consumer_key ? `${config.consumer_key.substring(0, 4)}...${config.consumer_key.slice(-4)}` : "missing",
+    passkey_hint: config.passkey ? `${config.passkey.substring(0, 4)}...${config.passkey.slice(-4)}` : "missing",
+    callback_url_check: `https://${req.get('host')}/api/mpesa/callback`
   });
 });
 
-// M-Pesa Daraja API Implementation
+// M-Pesa Configuration Helper
+const getMpesaConfig = () => {
+  const env = process.env.MPESA_ENV || "sandbox";
+  return {
+    consumer_key: process.env.MPESA_CONSUMER_KEY || "3nYb7Q2R0lWg4G4J9Gh8mHj3Zv6k7D1",
+    consumer_secret: process.env.MPESA_CONSUMER_SECRET || "0pL8vN2kR9mW7G4J9Gh8mHj3Zv6k7D1",
+    shortCode: process.env.MPESA_SHORTCODE || "174379",
+    passkey: process.env.MPESA_PASSKEY || "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
+    env: env,
+    baseUrl: env === "production" ? "https://api.safaricom.co.ke" : "https://sandbox.safaricom.co.ke"
+  };
+};
+
 const getAccessToken = async () => {
-  // Use hardcoded sandbox credentials for testing
-  const consumer_key = process.env.MPESA_CONSUMER_KEY || "3nYb7Q2R0lWg4G4J9Gh8mHj3Zv6k7D1";
-  const consumer_secret = process.env.MPESA_CONSUMER_SECRET || "0pL8vN2kR9mW7G4J9Gh8mHj3Zv6k7D1";
-  const mpesa_env = process.env.MPESA_ENV || "sandbox";
-  const url = mpesa_env === "production"
-    ? "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
-    : "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
-  const auth = "Basic " + Buffer.from(consumer_key + ":" + consumer_secret).toString("base64");
+  const config = getMpesaConfig();
+  const url = `${config.baseUrl}/oauth/v1/generate?grant_type=client_credentials`;
+  const auth = "Basic " + Buffer.from(config.consumer_key + ":" + config.consumer_secret).toString("base64");
+
+  console.log(`[M-Pesa] Fetching token from: ${config.baseUrl}`);
+
   try {
     const response = await axios.get(url, { headers: { Authorization: auth } });
     return response.data.access_token;
   } catch (error) {
-    console.error("Access Token Error:", error.response ? error.response.data : error.message);
-    throw error;
+    const errorMsg = error.response ? JSON.stringify(error.response.data) : error.message;
+    console.error(`[M-Pesa] Access Token Error: ${errorMsg}`);
+    throw new Error(`M-Pesa auth failed: ${errorMsg}`);
   }
 };
 
@@ -120,23 +342,8 @@ app.post("/api/mpesa/request", async (req, res) => {
   const { phone, amount } = req.body || {};
   if (!phone || !amount) return res.status(400).json({ success: false, message: "Missing phone or amount" });
 
-  // Use hardcoded sandbox credentials for testing
-  const consumer_key = process.env.MPESA_CONSUMER_KEY || "3nYb7Q2R0lWg4G4J9Gh8mHj3Zv6k7D1";
-  const consumer_secret = process.env.MPESA_CONSUMER_SECRET || "0pL8vN2kR9mW7G4J9Gh8mHj3Zv6k7D1";
-  const shortCode = process.env.MPESA_SHORTCODE || "174379";
-  const passkey = process.env.MPESA_PASSKEY || "bfb279c9769943b5f91a68735e1c7c";
-
-  // Debug logging
-  console.log("M-Pesa Request:", { phone, amount });
-  console.log("Using credentials:", {
-    consumer_key: consumer_key.substring(0, 10) + "...",
-    consumer_secret: consumer_secret.substring(0, 10) + "...",
-    shortcode: shortCode,
-    passkey: passkey.substring(0, 10) + "...",
-    env: process.env.MPESA_ENV || "sandbox"
-  });
-
   try {
+    const config = getMpesaConfig();
     const token = await getAccessToken();
     const date = new Date();
     const timestamp = date.getFullYear() +
@@ -146,44 +353,58 @@ app.post("/api/mpesa/request", async (req, res) => {
       ("0" + date.getMinutes()).slice(-2) +
       ("0" + date.getSeconds()).slice(-2);
 
-    const password = Buffer.from(shortCode + passkey + timestamp).toString("base64");
+    const password = Buffer.from(config.shortCode + config.passkey + timestamp).toString("base64");
+    const stk_url = `${config.baseUrl}/mpesa/stkpush/v1/processrequest`;
 
-    const mpesa_env = process.env.MPESA_ENV || "sandbox";
-    const transaction_type = process.env.MPESA_TRANSACTION_TYPE || "CustomerPayBillOnline";
-    const stk_url = mpesa_env === "production"
-      ? "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
-      : "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
-
+    // Critical: Render uses HTTPS, so we must ensure CallbackURL is HTTPS
     const host = req.get('host');
-    const callbackUrl = `https://${host}/api/mpesa/callback`;
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    let callbackUrl = `${protocol}://${host}/api/mpesa/callback`;
+
+    // If testing locally, Safaricom CANNOT reach localhost. 
+    // We'll use a placeholder but log a warning.
+    if (host.includes('localhost') || host.includes('127.0.0.1')) {
+      console.warn("[M-Pesa] Warning: Testing on localhost. Safaricom callbacks will fail.");
+      callbackUrl = "https://first-class-perfume.onrender.com/api/mpesa/callback";
+    }
+
+    // Normalize phone number: e.g., 0712... -> 254712...
+    let cleanPhone = phone.replace(/\D/g, "");
+    if (cleanPhone.startsWith("0")) cleanPhone = "254" + cleanPhone.substring(1);
+    if (cleanPhone.length === 9) cleanPhone = "254" + cleanPhone;
+    if (!cleanPhone.startsWith("254")) cleanPhone = "254" + cleanPhone;
+
+    console.log(`[M-Pesa] Initiating STK Push for ${cleanPhone} (KES ${amount})`);
+    console.log(`[M-Pesa] Environment: ${config.env}, Shortcode: ${config.shortCode}`);
 
     const data = {
-      BusinessShortCode: shortCode,
+      BusinessShortCode: config.shortCode,
       Password: password,
       Timestamp: timestamp,
-      TransactionType: transaction_type,
+      TransactionType: "CustomerPayBillOnline", // Standard for STK Push
       Amount: Math.round(amount),
-      PartyA: phone,
-      PartyB: shortCode,
-      PhoneNumber: phone,
+      PartyA: cleanPhone,
+      PartyB: config.shortCode,
+      PhoneNumber: cleanPhone,
       CallBackURL: callbackUrl,
       AccountReference: "FirstClassPerfume",
       TransactionDesc: "Payment for Perfume"
     };
 
-    console.log("Sending to M-Pesa:", { stk_url, data: { ...data, Password: "***" } });
+    const response = await axios.post(stk_url, data, {
+      headers: { Authorization: "Bearer " + token }
+    });
 
-    const response = await axios.post(stk_url, data, { headers: { Authorization: "Bearer " + token } });
-    console.log("STK Push Response:", response.data);
+    console.log("[M-Pesa] Safaricom Response:", response.data);
 
     if (response.data.ResponseCode === "0") {
-      res.json({ Success: true, message: "Prompt sent to your phone!", data: response.data });
+      res.json({ Success: true, message: "Prompt sent! Check your phone.", data: response.data });
     } else {
-      res.status(500).json({ Success: false, errorMessage: `Safaricom Error: ${response.data.ResponseDescription}` });
+      res.status(500).json({ Success: false, errorMessage: response.data.ResponseDescription });
     }
   } catch (error) {
     const errorData = error.response ? error.response.data : error.message;
-    console.error("STK Push Error:", errorData);
+    console.error("[M-Pesa] STK Push Error:", errorData);
 
     let userMessage = "M-Pesa request failed.";
     if (error.response && error.response.data) {
@@ -191,6 +412,29 @@ app.post("/api/mpesa/request", async (req, res) => {
     }
 
     res.status(500).json({ Success: false, errorMessage: userMessage });
+  }
+});
+
+// M-Pesa Callback Route
+app.post("/api/mpesa/callback", (req, res) => {
+  console.log("M-Pesa Callback received:", JSON.stringify(req.body, null, 2));
+
+  // Respond to Safaricom immediately
+  res.json({
+    ResultCode: 0,
+    ResultDesc: "Accepted"
+  });
+
+  // Handle transaction status
+  const callbackData = req.body.Body && req.body.Body.stkCallback;
+  if (callbackData) {
+    const { ResultCode, ResultDesc, CallbackMetadata } = callbackData;
+    if (ResultCode === 0) {
+      console.log("Payment Successful:", ResultDesc);
+      // Here you would typically update the order status in a database
+    } else {
+      console.log("Payment Failed/Cancelled:", ResultDesc);
+    }
   }
 });
 

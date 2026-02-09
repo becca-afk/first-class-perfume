@@ -16,7 +16,7 @@
     if (!header) return;
 
     const currentScrollY = window.scrollY;
-    
+
     if (currentScrollY > lastScrollY && currentScrollY > 100) {
       // Scrolling down - hide header
       header.classList.add('hidden');
@@ -24,7 +24,7 @@
       // Scrolling up or at top - show header
       header.classList.remove('hidden');
     }
-    
+
     lastScrollY = currentScrollY;
   }
 
@@ -441,8 +441,11 @@
             showToast("Order placed successfully!");
           }, 5000);
         } else {
-          feedback.textContent = data.errorMessage || "Request failed. Try again.";
+          // If Safaricom returns a specific error (e.g. invalid credentials, session timeout)
+          // we show it clearly now that the CSS is fixed.
+          feedback.textContent = data.errorMessage || "Request failed. Check your phone or try again.";
           feedback.classList.add("error");
+          console.error("M-Pesa specific error:", data);
         }
       })
       .catch(function (err) {

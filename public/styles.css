@@ -899,7 +899,8 @@ a:hover {
 }
 
 .mpesa-feedback.error {
-  color: #ffffff;
+  color: #ef5777;
+  /* Soft red for visibility */
 }
 
 .mpesa-actions {
