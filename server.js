@@ -43,8 +43,13 @@ const authMiddleware = (req, res, next) => {
   next();
 };
 
-// Protect all routes
-app.use(basicAuth);
+// Protect admin routes only
+app.use("/api/admin", authMiddleware);
+
+// Protect admin.html page
+app.get("/admin.html", authMiddleware, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin.html"));
+});
 
 app.use(express.static(path.join(__dirname, "public")));
 
