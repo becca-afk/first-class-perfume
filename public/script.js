@@ -422,35 +422,38 @@
     var total = cart.reduce(function (s, x) { return s + (x.price || 0) * (x.qty || 1); }, 0);
     feedback.textContent = "Sending request to your phone…";
     feedback.classList.remove("error");
+    // Version 4.0 - Clean Restart M-Pesa Logic
     fetch(API.mpesa, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone: phone, amount: total, items: cart }),
     })
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (!r.ok) {
+          return r.json().then(data => { throw new Error(data.errorMessage || data.message || "Server Error " + r.status); });
+        }
+        return r.json();
+      })
       .then(function (data) {
         if (data.Success) {
-          feedback.textContent = "Prompt sent! Check your phone.";
+          feedback.textContent = data.message || "Prompt sent! Check your phone.";
           feedback.classList.remove("error");
+          showToast("M-Pesa Prompt Sent!");
 
-          // Clear cart after a delay to allow user to see the success message
+          // Clear cart after success
           setTimeout(function () {
             setCart([]);
             closeDrawer("cart-drawer");
             closeMpesa();
             showToast("Order placed successfully!");
-          }, 5000);
+          }, 4000);
         } else {
-          // If Safaricom returns a specific error (e.g. invalid credentials, session timeout)
-          // we show it clearly now that the CSS is fixed.
-          feedback.textContent = data.errorMessage || "Request failed. Check your phone or try again.";
-          feedback.classList.add("error");
-          console.error("M-Pesa specific error:", data);
+          throw new Error(data.errorMessage || "Request failed");
         }
       })
       .catch(function (err) {
-        console.error(err);
-        feedback.textContent = "Connection error. Try again.";
+        console.error("[M-Pesa V4] Error:", err.message);
+        feedback.textContent = err.message + " (Try Hard Refresh: Ctrl+F5)";
         feedback.classList.add("error");
       });
   }
