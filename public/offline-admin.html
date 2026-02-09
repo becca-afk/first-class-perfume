@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Stock Manager - First Class Perfume</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --bg-card: #ffffff;
+            --text: #2c3e50;
+            --text-muted: #6c757d;
+            --accent: #007bff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --border: #dee2e6;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+
+        .offline-notice {
+            background: #fff3cd;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
+            border: 1px solid #ffeaa7;
+        }
+
+        .instructions {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .instructions h3 {
+            color: var(--accent);
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .instructions ol {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .instructions li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .file-input-section {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .file-label:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--accent);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .products-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--text);
+            margin: 0;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: var(--text);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-secondary {
+            background: var(--text-muted);
+        }
+
+        .btn-secondary:hover {
+            background: #495057;
+        }
+
+        .products-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .product-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto auto;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .product-category {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .product-price {
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        .stock-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stock-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .stock-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .stock-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .stock-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .stock-low {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .stock-out {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .stock-good {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .add-product-form {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .add-product-form.show {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .export-section {
+            background: var(--bg-card);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .product-card {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌸 First Class Perfume - Offline Stock Manager</h1>
+        
+        <div class="offline-notice">
+            <strong>📱 Works Completely Offline - No Internet Required!</strong><br>
+            This tool runs locally on your computer. Save it and use it anytime!
+        </div>
+
+        <div class="instructions">
+            <h3>📋 How to Use (Super Easy!)</h3>
+            <ol>
+                <li><strong>Save this page</strong> - Right-click → "Save As" → "perfume-manager.html"</li>
+                <li><strong>Open the saved file</strong> - Double-click it anytime</li>
+                <li><strong>Load products</strong> - Click "Load Products" and select your products file</li>
+                <li><strong>Manage stock</strong> - Use + and − buttons to update quantities</li>
+                <li><strong>Save changes</strong> - Click "Export" to download updated file</li>
+                <li><strong>Share file</strong> - Send the exported file to update the website</li>
+            </ol>
+        </div>
+
+        <div class="file-input-section">
+            <input type="file" id="fileInput" class="file-input" accept=".json">
+            <label for="fileInput" class="file-label">📁 Load Products File</label>
+        </div>
+
+        <div class="export-section">
+            <button class="btn btn-success" onclick="exportProducts()">💾 Export Updated Products</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="total-products">0</div>
+                <div class="stat-label">Total Products</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="in-stock">0</div>
+                <div class="stat-label">In Stock</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="low-stock">0</div>
+                <div class="stat-label">Low Stock</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="out-stock">0</div>
+                <div class="stat-label">Out of Stock</div>
+            </div>
+        </div>
+
+        <div class="products-section">
+            <div class="section-header">
+                <h2 class="section-title">Product Inventory</h2>
+                <button class="btn" onclick="toggleAddProduct()">+ Add New Product</button>
+            </div>
+
+            <div class="add-product-form" id="addProductForm">
+                <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text);">Add New Product</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Product Name *</label>
+                        <input type="text" id="newProductName" placeholder="e.g., Rose Perfume">
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select id="newProductCategory">
+                            <option value="women">Women</option>
+                            <option value="men">Men</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Price (KES) *</label>
+                        <input type="number" id="newProductPrice" placeholder="e.g., 5500">
+                    </div>
+                    <div class="form-group">
+                        <label>Initial Stock *</label>
+                        <input type="number" id="newProductStock" placeholder="e.g., 10">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Description *</label>
+                        <textarea id="newProductDesc" placeholder="Describe perfume scent and notes..."></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-success" onclick="addNewProduct()">Add Product</button>
+                    <button class="btn btn-secondary" onclick="toggleAddProduct()">Cancel</button>
+                </div>
+            </div>
+
+            <div class="products-grid" id="productsGrid"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let products = [];
+
+        // File input handler
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        products = JSON.parse(e.target.result);
+                        renderProducts();
+                        updateStats();
+                        showToast('Products loaded successfully!');
+                    } catch (error) {
+                        showToast('Error loading file. Please make sure it\'s a valid JSON file.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            if (products.length === 0) {
+                grid.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">No products loaded. Click "Load Products File" to get started.</div>';
+                return;
+            }
+            
+            grid.innerHTML = products.map(product => {
+                const stockClass = product.stock === 0 ? 'stock-out' : product.stock < 5 ? 'stock-low' : 'stock-good';
+                const stockLabel = product.stock === 0 ? 'Out' : product.stock < 5 ? 'Low' : 'Good';
+                
+                return `
+                    <div class="product-card">
+                        <div>
+                            <div class="product-name">${escapeHtml(product.name)}</div>
+                            <div class="product-category">${product.category === 'women' ? 'Women' : 'Men'}</div>
+                        </div>
+                        <div class="product-price">KES ${product.price.toLocaleString()}</div>
+                        <div class="stock-controls">
+                            <button class="stock-btn" onclick="updateStock('${product.id}', -1)" ${product.stock === 0 ? 'disabled' : ''}>−</button>
+                            <div class="stock-value ${stockClass}">${product.stock}</div>
+                            <button class="stock-btn" onclick="updateStock('${product.id}', 1)">+</button>
+                        </div>
+                        <div>
+                            <button class="btn btn-warning" onclick="updateStock('${product.id}', ${-product.stock})">Set to 0</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const total = products.length;
+            const inStock = products.filter(p => p.stock > 5).length;
+            const lowStock = products.filter(p => p.stock > 0 && p.stock <= 5).length;
+            const outStock = products.filter(p => p.stock === 0).length;
+
+            document.getElementById('total-products').textContent = total;
+            document.getElementById('in-stock').textContent = inStock;
+            document.getElementById('low-stock').textContent = lowStock;
+            document.getElementById('out-stock').textContent = outStock;
+        }
+
+        function updateStock(productId, change) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                product.stock = Math.max(0, product.stock + change);
+                renderProducts();
+                updateStats();
+                showToast('Stock updated successfully!');
+            }
+        }
+
+        function toggleAddProduct() {
+            const form = document.getElementById('addProductForm');
+            form.classList.toggle('show');
+            
+            if (form.classList.contains('show')) {
+                document.getElementById('newProductName').focus();
+            } else {
+                clearAddProductForm();
+            }
+        }
+
+        function clearAddProductForm() {
+            document.getElementById('newProductName').value = '';
+            document.getElementById('newProductCategory').value = 'women';
+            document.getElementById('newProductPrice').value = '';
+            document.getElementById('newProductStock').value = '';
+            document.getElementById('newProductDesc').value = '';
+        }
+
+        function addNewProduct() {
+            const name = document.getElementById('newProductName').value.trim();
+            const category = document.getElementById('newProductCategory').value;
+            const price = parseInt(document.getElementById('newProductPrice').value);
+            const stock = parseInt(document.getElementById('newProductStock').value);
+            const desc = document.getElementById('newProductDesc').value.trim();
+
+            if (!name || !category || !price || !stock || !desc) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            // Generate new ID
+            const prefix = category === 'women' ? 'w' : 'm';
+            const existingIds = products
+                .filter(p => p.id.startsWith(prefix))
+                .map(p => parseInt(p.id.substring(1)))
+                .filter(n => !isNaN(n));
+            const nextNum = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+            const newId = `${prefix}${nextNum}`;
+
+            const newProduct = {
+                id: newId,
+                name,
+                price: price,
+                desc,
+                category,
+                stock: stock
+            };
+
+            products.push(newProduct);
+            renderProducts();
+            updateStats();
+            clearAddProductForm();
+            toggleAddProduct();
+            showToast('New product added successfully!');
+        }
+
+        function exportProducts() {
+            if (products.length === 0) {
+                showToast('No products to export', 'error');
+                return;
+            }
+
+            const dataStr = JSON.stringify(products, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'products-updated.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showToast('Products exported successfully!');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = type === 'error' ? 'var(--danger)' : 'var(--success)';
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "w1",
+    "name": "Versace Bright Crystal",
+    "price": 9000,
+    "desc": "Fresh Floral Feminine Scent",
+    "category": "women",
+    "stock": 15
+  },
+  {
+    "id": "w2",
+    "name": "Davidoff Cool Water (Women)",
+    "price": 5600,
+    "desc": "Fresh Aquatic Scent",
+    "category": "women",
+    "stock": 8
+  },
+  {
+    "id": "m1",
+    "name": "Versace Eros",
+    "price": 9500,
+    "desc": "Bold Fresh Masculine Scent",
+    "category": "men",
+    "stock": 12
+  },
+  {
+    "id": "m2",
+    "name": "Davidoff Cool Water (Men)",
+    "price": 6000,
+    "desc": "Fresh Aquatic Classic Scent",
+    "category": "men",
+    "stock": 6
+  }
+]
