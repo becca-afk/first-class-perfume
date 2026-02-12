@@ -336,6 +336,9 @@
                         <tr>
                             <th>Order ID</th>
                             <th>Date</th>
+                            <th>Customer</th>
+                            <th>Phone</th>
+                            <th>Location</th>
                             <th>Items</th>
                             <th>Total</th>
                             <th>Status</th>
@@ -567,10 +570,14 @@
             const tbody = document.getElementById('orders-body');
             tbody.innerHTML = orders.reverse().map(o => {
                 const items = o.items.map(i => `${i.name} (${i.qty})`).join(', ');
+                const customerName = (o.customer && o.customer.name) || 'Guest';
                 return `
           <tr>
             <td><strong>#${o.id}</strong></td>
             <td>${new Date(o.createdAt).toLocaleDateString()}</td>
+            <td>${escapeHtml(customerName)}</td>
+            <td>${escapeHtml(o.phone || '-')}</td>
+            <td><small>${escapeHtml(o.shippingAddress || '-')}</small></td>
             <td style="font-size: 0.8rem;">${escapeHtml(items)}</td>
             <td>KES ${o.total.toLocaleString()}</td>
             <td><span class="stock-value ${o.status === 'delivered' ? 'ok' : o.status === 'shipped' ? 'orange' : 'low'}">${o.status}</span></td>
