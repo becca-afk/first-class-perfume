@@ -188,7 +188,7 @@ app.post("/api/order/:orderId/transaction", (req, res) => {
     if (!fs.existsSync(ordersFile)) return res.status(404).json({ success: false, message: "Orders file not found" });
 
     const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
-    const orderIndex = ordersData.orders.findIndex(o => o.id == orderId);
+    const orderIndex = ordersData.orders.findIndex(o => String(o.id) === String(orderId));
 
     if (orderIndex === -1) {
       return res.status(404).json({ success: false, message: "Order not found" });
