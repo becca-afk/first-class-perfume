@@ -512,9 +512,9 @@
               const currentUrl = new URL(waBtn.href);
               let text = decodeURIComponent(currentUrl.searchParams.get("text") || "");
               if (text && !text.includes(code)) {
-                text += "\n\nMy Payment Proof is: " + code;
+                text += "\n\nPaid from M-Pesa Number: " + code;
                 waBtn.href = "https://wa.me/" + currentUrl.pathname.substring(1) + "?text=" + encodeURIComponent(text);
-                console.log("[DEBUG] Updated WhatsApp URL with proof");
+                console.log("[DEBUG] Updated WhatsApp URL with phone number");
               }
             }
           } catch (urlErr) {
