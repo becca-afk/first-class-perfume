@@ -444,9 +444,24 @@
 
           let message = "Hello First Class Perfume! I'd like to complete my order #" + orderId + ".\n\n";
           message += "Product Details:\n";
+
+          let summaryHtml = '<h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Order Summary:</h4><ul style="list-style: none; padding: 0; margin: 0;">';
+
           cart.forEach(item => {
-            message += "- " + item.name + " (x" + item.qty + ") - KES " + formatNumber(item.price * item.qty) + "\n";
+            const itemTotal = item.price * (item.qty || 1);
+            message += "- " + item.name + " (x" + (item.qty || 1) + ") - KES " + formatNumber(itemTotal) + "\n";
+
+            summaryHtml += `<li style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
+                              <span>${item.name} <span style="color: var(--text-muted);">x${item.qty || 1}</span></span>
+                              <span>KES ${formatNumber(itemTotal)}</span>
+                            </li>`;
           });
+
+          summaryHtml += `<li style="display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; margin-top: 0.5rem; border-top: 1px dashed var(--border); padding-top: 0.5rem;">
+                            <span>Total</span>
+                            <span>KES ${formatNumber(total)}</span>
+                          </li></ul>`;
+
           message += "\nTotal: KES " + formatNumber(total) + "\n";
           message += "\nDelivery to:\n" + location + "\n";
           message += "\nRecipient: " + name + " (" + phone + ")\n";
@@ -463,7 +478,10 @@
 
           document.getElementById("success-order-id").textContent = "#" + orderId;
           document.getElementById("success-total").textContent = "KES " + formatNumber(total);
+          document.getElementById("success-order-id").textContent = "#" + orderId;
+          document.getElementById("success-total").textContent = "KES " + formatNumber(total);
           document.getElementById("whatsapp-redirect-btn").href = whatsappUrl;
+          document.getElementById("success-order-summary").innerHTML = summaryHtml;
 
           // Pre-fill the payment number with the phone number they just used
           document.getElementById("mpesa-code").value = phone;
