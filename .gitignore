@@ -8,3 +8,4 @@ download-images-corrected.js
 image-fix-needed.js
 build-and-zip.ps1
 data/order-history.json
+data/orders.json
