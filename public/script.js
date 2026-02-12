@@ -434,7 +434,7 @@
       .then(res => {
         if (res.success) {
           const orderId = res.orderId;
-          const adminPhone = "254712345678"; // Replace with real admin phone
+          const adminPhone = "254729072269"; // Owner's WhatsApp number
 
           let message = "Hello First Class Perfume! I'd like to complete my order #" + orderId + ".\n\n";
           message += "Product Details:\n";
