@@ -140,8 +140,6 @@
     if (p.stock === 0) {
       btnState = "disabled";
       btnText = "Out of Stock";
-    } else if (p.stock < 5) {
-      stockMsg = '<span class="stock-warn">Limited Stock!</span>';
     }
 
     card.innerHTML =
@@ -223,10 +221,8 @@
       btnState = "disabled";
       btnText = "Out of Stock";
       stockDisplay = '<p class="stock-status out">Out of Stock</p>';
-    } else if (p.stock < 5) {
-      stockDisplay = '<p class="stock-status low">Limited Availability!</p>';
     } else {
-      stockDisplay = '<p class="stock-status in">In Stock</p>';
+      stockDisplay = ''; // Hide "In Stock" messages
     }
 
     body.innerHTML =
