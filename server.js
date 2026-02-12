@@ -76,9 +76,9 @@ app.get("/api/products", (req, res) => {
 });
 
 app.post("/api/order", async (req, res) => {
-  const { customer, items, total, paymentMethod, phone, shippingAddress } = req.body || {};
+  const { customer, items, total, paymentMethod, phone, shippingAddress, transactionId } = req.body || {};
 
-  if (!customer || !items || !total || !paymentMethod) {
+  if (!items || !total || !paymentMethod) {
     return res.status(400).json({ success: false, message: "Missing required order information" });
   }
 
@@ -93,12 +93,13 @@ app.post("/api/order", async (req, res) => {
     // Create new order
     const newOrder = {
       id: ordersData.nextOrderId++,
-      customer,
+      customer: customer || { name: "Guest", email: "guest@example.com" },
       items,
       total,
       paymentMethod,
       phone,
       shippingAddress,
+      transactionId: transactionId || null,
       status: "pending",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -422,7 +423,8 @@ app.post("/api/ratings", (req, res) => {
   res.json({ success: true });
 });
 
-const PORT = process.env.PORT;
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

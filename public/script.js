@@ -141,7 +141,7 @@
       btnState = "disabled";
       btnText = "Out of Stock";
     } else if (p.stock < 5) {
-      stockMsg = '<span class="stock-warn">Only ' + p.stock + ' left!</span>';
+      stockMsg = '<span class="stock-warn">Limited Stock!</span>';
     }
 
     card.innerHTML =
@@ -224,9 +224,9 @@
       btnText = "Out of Stock";
       stockDisplay = '<p class="stock-status out">Out of Stock</p>';
     } else if (p.stock < 5) {
-      stockDisplay = '<p class="stock-status low">Only ' + p.stock + ' items left!</p>';
+      stockDisplay = '<p class="stock-status low">Limited Availability!</p>';
     } else {
-      stockDisplay = '<p class="stock-status in">In Stock (' + p.stock + ')</p>';
+      stockDisplay = '<p class="stock-status in">In Stock</p>';
     }
 
     body.innerHTML =
@@ -393,63 +393,51 @@
       showToast("Cart is empty");
       return;
     }
+
     var total = cart.reduce(function (s, x) { return s + (x.price || 0) * (x.qty || 1); }, 0);
-    document.getElementById("payment-amount").textContent = "KES " + formatNumber(total);
-    document.getElementById("card-number").value = "";
-    document.getElementById("card-expiry").value = "";
-    document.getElementById("card-cvc").value = "";
-    document.getElementById("payment-feedback").textContent = "";
-    document.getElementById("payment-overlay").hidden = false;
-  }
 
-  function closePayment() {
-    document.getElementById("payment-overlay").hidden = true;
-  }
+    // Flutterwave Real Payment Integration
+    FlutterwaveCheckout({
+      public_key: "FLWPUBK_TEST-REPLACE_ME", // Placeholder - Need real key
+      tx_ref: "FCP-" + Date.now(),
+      amount: total,
+      currency: "KES",
+      payment_options: "card, mpesa",
+      customer: {
+        email: "customer@firstclassperfume.com", // Will be updated to real email if collected
+        name: "First Class Customer",
+      },
+      customizations: {
+        title: "First Class Perfume",
+        description: "Payment for luxury fragrances",
+        logo: "https://firstclassperfume.com/images/logo.png",
+      },
+      callback: function (data) {
+        if (data.status === "successful") {
+          showToast("Payment Successful! Processing order...");
 
-  function doCardPay() {
-    var card = document.getElementById("card-number").value.replace(/\s/g, "");
-    var feedback = document.getElementById("payment-feedback");
-
-    if (card.length < 16) {
-      feedback.textContent = "Please enter a valid card number.";
-      return;
-    }
-
-    feedback.textContent = "Processing payment...";
-
-    // Simulate API call for card payment
-    setTimeout(() => {
-      const cart = getCart();
-      const total = cart.reduce((s, x) => s + (x.price * x.qty), 0);
-
-      fetch(API.order, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customer: { name: "Web Customer", email: "customer@example.com" }, // Simple mock
-          items: cart,
-          total: total,
-          paymentMethod: "card"
-        })
-      })
-        .then(r => r.json())
-        .then(data => {
-          if (data.success) {
-            feedback.textContent = "Payment Successful! Redirecting to tracking...";
-            showToast("Order #" + data.orderId + " placed!");
-            setCart([]);
-            setTimeout(() => {
-              window.location.href = "track-order.html?id=" + data.orderId;
-            }, 2000);
-          } else {
-            feedback.textContent = "Payment failed. Please try again.";
-          }
-        })
-        .catch(err => {
-          console.error("Order error:", err);
-          feedback.textContent = "Error processing order.";
-        });
-    }, 1500);
+          fetch(API.order, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              items: cart,
+              total: total,
+              paymentMethod: "flutterwave",
+              transactionId: data.transaction_id,
+              customer: { name: "Web Customer", email: "customer@example.com" }
+            })
+          })
+            .then(r => r.json())
+            .then(res => {
+              setCart([]);
+              window.location.href = "track-order.html?id=" + res.orderId;
+            });
+        }
+      },
+      onclose: function () {
+        console.log("Payment window closed");
+      }
+    });
   }
 
 
@@ -493,12 +481,6 @@
 
     document.getElementById("modal-close").onclick = closeModal;
     document.getElementById("modal-backdrop").onclick = closeModal;
-
-    var paymentOverlay = document.getElementById("payment-overlay");
-    if (paymentOverlay) {
-      document.getElementById("payment-cancel").onclick = closePayment;
-      document.getElementById("payment-pay").onclick = doCardPay;
-    }
 
 
     fetch(API.products)

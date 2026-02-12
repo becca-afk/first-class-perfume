@@ -31,6 +31,7 @@
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <script src="https://checkout.flutterwave.com/v3.js"></script>
 </head>
 
 <body>
@@ -123,48 +124,7 @@
 
     <div id="toast" class="toast" aria-live="polite"></div>
 
-    <!-- Card Payment Overlay -->
-    <div class="payment-overlay" id="payment-overlay" hidden>
-      <div class="payment-box">
-        <h3>Pay with Card</h3>
-        <p class="payment-amount" id="payment-amount">KES 0</p>
-
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label for="card-number"
-            style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;">Card
-            Number</label>
-          <input type="text" id="card-number" placeholder="1234 5678 9101 1121" maxlength="19"
-            style="width: 100%; padding: 0.65rem; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px;">
-        </div>
-
-        <div style="display: flex; gap: 10px; margin-bottom: 1.5rem;">
-          <div class="form-group" style="flex: 1;">
-            <label for="card-expiry"
-              style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;">Expiry</label>
-            <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5"
-              style="width: 100%; padding: 0.65rem; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px;">
-          </div>
-          <div class="form-group" style="flex: 1;">
-            <label for="card-cvc"
-              style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;">CVC</label>
-            <input type="text" id="card-cvc" placeholder="123" maxlength="3"
-              style="width: 100%; padding: 0.65rem; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px;">
-          </div>
-        </div>
-
-        <p class="payment-feedback" id="payment-feedback" role="status"
-          style="min-height: 1.2rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--accent);"></p>
-
-        <div class="payment-actions" style="display: flex; gap: 0.75rem;">
-          <button type="button" class="btn btn-outline" id="payment-cancel" style="flex: 1;">Cancel</button>
-          <button type="button" class="btn btn-primary" id="payment-pay" style="flex: 1;">Pay Now</button>
-        </div>
-
-        <div style="margin-top: 15px; font-size: 11px; opacity: 0.6; text-align: center;">
-          <p>Secure Card Payment via MockGate 🔒</p>
-        </div>
-      </div>
-    </div>
+    <!-- Real Flutterwave Checkout will trigger via JavaScript pop-up -->
 
     <footer class="footer">
       <div class="container">
