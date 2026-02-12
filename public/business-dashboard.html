@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Business Dashboard - First Class Perfume</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400&family=Montserrat:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --bg: #f8f9fa;
@@ -19,7 +22,7 @@
             --danger: #dc3545;
             --info: #17a2b8;
             --border: #dee2e6;
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         * {
@@ -291,22 +294,23 @@
             .tabs {
                 flex-direction: column;
             }
-            
+
             .order-card {
                 grid-template-columns: 1fr;
                 gap: 1rem;
             }
-            
+
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>🌸 First Class Perfume Business Dashboard</h1>
-        
+
         <div class="tabs">
             <button class="tab active" onclick="showTab('overview')">📊 Overview</button>
             <button class="tab" onclick="showTab('orders')">📦 Orders</button>
@@ -383,7 +387,7 @@
         let users = [];
 
         // Load data on page load
-        window.onload = function() {
+        window.onload = function () {
             loadOrders();
             loadProducts();
             loadCustomers();
@@ -407,7 +411,7 @@
             try {
                 const response = await fetch('/api/admin/orders', {
                     headers: {
-                        'Authorization': 'Basic ' + btoa('family:perfume2026')
+                        'Authorization': 'Basic ' + btoa('admin:admin123')
                     }
                 });
                 const data = await response.json();
@@ -456,7 +460,7 @@
 
             const orderHtml = orders.map(order => {
                 const statusClass = `status-${order.status}`;
-                const itemsList = order.items ? order.items.map(item => 
+                const itemsList = order.items ? order.items.map(item =>
                     `<li>${item.name} (x${item.quantity}) - KES ${item.price}</li>`
                 ).join('') : '<li>No items</li>';
 
@@ -485,7 +489,7 @@
             }).join('');
 
             allOrdersGrid.innerHTML = orderHtml;
-            
+
             // Show only recent orders (last 5)
             const recentOrders = orders.slice(-5).reverse();
             recentOrdersGrid.innerHTML = recentOrders.map(order => {
@@ -510,7 +514,7 @@
 
         function getStatusButtons(order) {
             const buttons = [];
-            
+
             if (order.status === 'pending') {
                 buttons.push(`<button class="btn btn-info" onclick="updateOrderStatus(${order.id}, 'processing')">Process</button>`);
             }
@@ -523,7 +527,7 @@
             if (order.status !== 'cancelled' && order.status !== 'delivered') {
                 buttons.push(`<button class="btn btn-danger" onclick="updateOrderStatus(${order.id}, 'cancelled')">Cancel</button>`);
             }
-            
+
             return buttons.join('');
         }
 
@@ -598,7 +602,7 @@
                         <div class="stat-label">Total Customers</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">${users.filter(u => new Date(u.createdAt) > new Date(Date.now() - 30*24*60*60*1000)).length}</div>
+                        <div class="stat-number">${users.filter(u => new Date(u.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length}</div>
                         <div class="stat-label">New This Month</div>
                     </div>
                 </div>
@@ -622,11 +626,12 @@
             toast.textContent = message;
             toast.style.background = type === 'error' ? 'var(--danger)' : 'var(--success)';
             toast.classList.add('show');
-            
+
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
         }
     </script>
 </body>
+
 </html>

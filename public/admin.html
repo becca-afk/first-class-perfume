@@ -488,7 +488,11 @@
 
         async function loadOrders() {
             try {
-                const res = await fetch('/api/admin/orders');
+                const res = await fetch('/api/admin/orders', {
+                    headers: {
+                        'Authorization': 'Basic ' + btoa('admin:admin123')
+                    }
+                });
                 const data = await res.json();
                 renderOrders(data.orders || []);
             } catch (err) {
@@ -558,7 +562,10 @@
             try {
                 const res = await fetch(`/api/admin/order/${orderId}/status`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + btoa('admin:admin123')
+                    },
                     body: JSON.stringify({ status: 'processing' })
                 });
                 if (res.ok) {
@@ -582,7 +589,10 @@
                 try {
                     const res = await fetch(`/api/admin/order/${orderId}/alert`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Basic ' + btoa('admin:admin123')
+                        },
                         body: JSON.stringify({ message: msg })
                     });
                     if (res.ok) {
@@ -632,7 +642,10 @@
             try {
                 const res = await fetch('/api/admin/update-stock', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + btoa('admin:admin123')
+                    },
                     body: JSON.stringify({ productId, stock: parseInt(stock) })
                 });
                 if (res.ok) {
@@ -677,7 +690,10 @@
             try {
                 const res = await fetch('/api/admin/add-product', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + btoa('admin:admin123')
+                    },
                     body: JSON.stringify({
                         name,
                         category: currentCategory,
@@ -710,7 +726,10 @@
             try {
                 const res = await fetch('/api/admin/delete-product', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + btoa('admin:admin123')
+                    },
                     body: JSON.stringify({ productId })
                 });
 
