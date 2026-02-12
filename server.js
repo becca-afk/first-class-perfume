@@ -10,6 +10,16 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// --- EMAIL CONFIGURATION ---
+// Structure for future Nodemailer use
+const sendEmail = (to, subject, text, html) => {
+  console.log(`\x1b[36m[OUTGOING EMAIL]\x1b[0m To: ${to} | Subject: ${subject}`);
+  console.log(`Content: ${text}`);
+  // Future integration:
+  // const transporter = nodemailer.createTransport({...});
+  // await transporter.sendMail({ from: '"First Class Perfume" <noreply@fcp.com>', to, subject, text, html });
+};
+
 // Simple authentication middleware
 const authMiddleware = (req, res, next) => {
   const auth = req.headers.authorization;
@@ -290,13 +300,39 @@ app.post("/api/admin/order/:id/status", (req, res) => {
     ordersData.orders[orderIndex].status = status;
     ordersData.orders[orderIndex].updatedAt = new Date().toISOString();
 
+    const order = ordersData.orders[orderIndex];
+
     fs.writeFileSync(ordersFile, JSON.stringify(ordersData, null, 2));
 
-    console.log(`Order ${id} status updated to: ${status}`);
+    // Send Notification Email if status is Processing (Confirmed)
+    if (status === 'processing') {
+      const emailBody = `Hello ${order.customer.name}, your payment for Order #${id} has been confirmed! We are now preparing your items.`;
+      sendEmail(order.customer.email, `Order #${id} Confirmed - First Class Perfume`, emailBody);
+    }
+
     res.json({ success: true, message: "Status updated" });
   } catch (error) {
     console.error("Error updating status:", error);
     res.status(500).json({ success: false, message: "Failed to update status" });
+  }
+});
+
+// Admin: Send Custom Alert Email
+app.post("/api/admin/order/:id/alert", (req, res) => {
+  const { id } = req.params;
+  const { message } = req.body;
+
+  try {
+    const ordersFile = path.join(__dirname, "data", "orders.json");
+    const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
+    const order = ordersData.orders.find(o => String(o.id) === String(id));
+
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+    sendEmail(order.customer.email, `Update on your Order #${id}`, message);
+    res.json({ success: true, message: "Alert sent" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to send alert" });
   }
 });
 
