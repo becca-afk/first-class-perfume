@@ -113,8 +113,25 @@
             <div id="track-result" hidden>
                 <div class="order-info"
                     style="margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
-                    <h2 id="result-id">Order #1</h2>
-                    <p id="result-date">Placed on February 12, 2026</p>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h2 id="result-id">Order #1</h2>
+                            <p id="result-date">Placed on February 12, 2026</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">Total Amount
+                            </p>
+                            <h3 id="result-total" style="color: var(--accent);">KES 0</h3>
+                        </div>
+                    </div>
+                    <div id="result-transaction-box"
+                        style="margin-top: 1rem; padding: 0.75rem; background: var(--bg); border: 1px dashed var(--border); border-radius: 4px;"
+                        hidden>
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">M-Pesa
+                            Transaction Code</p>
+                        <code id="result-transaction"
+                            style="font-family: monospace; font-weight: 600; color: var(--accent); letter-spacing: 1px;">-</code>
+                    </div>
                 </div>
 
                 <div class="timeline" id="timeline">
@@ -171,8 +188,14 @@
 
                 document.getElementById('result-id').textContent = `Order #${data.id}`;
                 document.getElementById('result-date').textContent = `Placed on ${new Date(data.createdAt).toLocaleDateString()}`;
+                document.getElementById('result-total').textContent = `KES ${(data.total || 0).toLocaleString()}`;
 
-                // Update timeline status
+                if (data.transactionId) {
+                    document.getElementById('result-transaction').textContent = data.transactionId;
+                    document.getElementById('result-transaction-box').hidden = false;
+                } else {
+                    document.getElementById('result-transaction-box').hidden = true;
+                }
                 const steps = ['pending', 'processing', 'shipped', 'delivered'];
                 const currentIdx = steps.indexOf(data.status);
 

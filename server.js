@@ -305,6 +305,8 @@ app.get("/api/order/track/:id", (req, res) => {
     res.json({
       id: order.id,
       status: order.status || "pending",
+      total: order.total,
+      transactionId: order.transactionId || null,
       createdAt: order.createdAt
     });
   } catch (error) {
