@@ -617,6 +617,14 @@
         }
 
         loadProducts();
+
+        // Auto-refresh orders every 30 seconds if on the orders view
+        setInterval(() => {
+            const ordersView = document.getElementById('orders-view');
+            if (ordersView && ordersView.classList.contains('active')) {
+                loadOrders();
+            }
+        }, 30000);
     </script>
 </body>
 
