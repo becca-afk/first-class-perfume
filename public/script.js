@@ -482,6 +482,7 @@
           document.getElementById("success-order-id").textContent = "#" + orderId;
           document.getElementById("success-total").textContent = "KES " + formatNumber(total);
           document.getElementById("whatsapp-redirect-btn").href = whatsappUrl;
+          console.log("[DEBUG] WhatsApp URL set successfully");
           document.getElementById("success-order-summary").innerHTML = summaryHtml;
 
           setCart([]);
