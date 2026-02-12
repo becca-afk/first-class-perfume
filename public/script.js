@@ -483,35 +483,52 @@
       showToast("Please enter the M-Pesa code");
       return;
     }
-    console.log("Submitting M-Pesa code for Order:", lastOrderId, "Code:", code);
-    showToast("Submitting code...");
+    console.log("[DEBUG] submitMpesaCode called. Code:", code, "lastOrderId:", lastOrderId);
+    const btn = document.getElementById("submit-mpesa-btn");
+    btn.disabled = true;
+    btn.textContent = "Submitting...";
 
     fetch("/api/order/" + lastOrderId + "/transaction", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ transactionId: code })
     })
-      .then(r => r.json())
+      .then(r => {
+        console.log("[DEBUG] Server response status:", r.status);
+        return r.json();
+      })
       .then(res => {
-        console.log("M-Pesa submission response:", res);
+        console.log("[DEBUG] Server response body:", res);
         if (res.success) {
           showToast("Code submitted! Thank you.");
-          document.getElementById("submit-mpesa-btn").disabled = true;
-          document.getElementById("submit-mpesa-btn").textContent = "Submitted ✓";
+          btn.textContent = "Submitted ✓";
 
-          // Update WhatsApp message to include the code if they haven't sent it yet
-          const btn = document.getElementById("whatsapp-redirect-btn");
-          const currentUrl = new URL(btn.href);
-          const text = decodeURIComponent(currentUrl.searchParams.get("text"));
-          const newText = text + "\n\nMy M-Pesa Code is: " + code;
-          btn.href = "https://wa.me/" + currentUrl.pathname.substring(1) + "?text=" + encodeURIComponent(newText);
+          try {
+            // Update WhatsApp message
+            const waBtn = document.getElementById("whatsapp-redirect-btn");
+            if (waBtn.href && waBtn.href !== "#") {
+              const currentUrl = new URL(waBtn.href);
+              let text = decodeURIComponent(currentUrl.searchParams.get("text") || "");
+              if (text && !text.includes(code)) {
+                text += "\n\nMy M-Pesa Code is: " + code;
+                waBtn.href = "https://wa.me/" + currentUrl.pathname.substring(1) + "?text=" + encodeURIComponent(text);
+                console.log("[DEBUG] Updated WhatsApp URL with code");
+              }
+            }
+          } catch (urlErr) {
+            console.error("Error updating WhatsApp URL:", urlErr);
+          }
         } else {
           showToast("Error: " + (res.message || "Could not save code"));
+          btn.disabled = false;
+          btn.textContent = "Submit Code";
         }
       })
       .catch(err => {
-        console.error("Code submission fetch error:", err);
+        console.error("[DEBUG] Code submission fetch error:", err);
         showToast("Connection error.");
+        btn.disabled = false;
+        btn.textContent = "Submit Code";
       });
   }
 
