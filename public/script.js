@@ -483,11 +483,7 @@
       showToast("Please enter the M-Pesa code");
       return;
     }
-    if (!lastOrderId) {
-      showToast("No active order found");
-      return;
-    }
-
+    console.log("Submitting M-Pesa code for Order:", lastOrderId, "Code:", code);
     showToast("Submitting code...");
 
     fetch("/api/order/" + lastOrderId + "/transaction", {
@@ -497,6 +493,7 @@
     })
       .then(r => r.json())
       .then(res => {
+        console.log("M-Pesa submission response:", res);
         if (res.success) {
           showToast("Code submitted! Thank you.");
           document.getElementById("submit-mpesa-btn").disabled = true;
@@ -513,7 +510,7 @@
         }
       })
       .catch(err => {
-        console.error("Code error:", err);
+        console.error("Code submission fetch error:", err);
         showToast("Connection error.");
       });
   }
