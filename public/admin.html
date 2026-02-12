@@ -596,6 +596,34 @@
           </tr>
         `;
             }).join('');
+        }).join('');
+        }
+
+        async function confirmPayment(orderId) {
+            if (!confirm('Confirm payment received?')) return;
+            // Optimistic update
+            const btn = event.target;
+            btn.innerHTML = '...';
+
+            try {
+                const res = await fetch(`/api/admin/order/${orderId}/status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'processing' })
+                });
+
+                if (res.ok) {
+                    showToast('Payment confirmed!');
+                    loadOrders();
+                } else {
+                    showToast('Failed to confirm');
+                    btn.innerHTML = '✓ Confirm';
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error connecting');
+                btn.innerHTML = '✓ Confirm';
+            }
         }
 
         async function updateOrderStatus(orderId, status) {

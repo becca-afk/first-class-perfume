@@ -148,6 +148,14 @@
                   style="color: var(--accent); font-size: 2.5rem; font-family: monospace; display: block;">#------</strong>
               </div>
 
+              <div id="payment-status-container"
+                style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; background: var(--bg-elevated); border: 1px dashed var(--accent);">
+                <p style="font-size: 0.8rem; margin-bottom: 0.5rem; color: var(--text-muted);">Payload Status:</p>
+                <strong id="live-payment-status" style="font-size: 1.2rem; color: var(--orange);">Waiting for
+                  Confirmation...</strong>
+                <div id="payment-loader" class="loader" style="margin: 0.5rem auto;"></div>
+              </div>
+
               <div id="success-order-summary"
                 style="margin-bottom: 1.5rem; text-align: left; background: var(--bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
                 <!-- Items injected by script -->
