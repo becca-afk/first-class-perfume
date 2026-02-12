@@ -464,7 +464,9 @@
           document.getElementById("success-order-id").textContent = "#" + orderId;
           document.getElementById("success-total").textContent = "KES " + formatNumber(total);
           document.getElementById("whatsapp-redirect-btn").href = whatsappUrl;
-          document.getElementById("mpesa-code").value = "";
+
+          // Pre-fill the payment number with the phone number they just used
+          document.getElementById("mpesa-code").value = phone;
 
           setCart([]);
         } else {
@@ -480,7 +482,7 @@
   function submitMpesaCode() {
     const code = document.getElementById("mpesa-code").value.trim().toUpperCase();
     if (!code) {
-      showToast("Please enter the M-Pesa code");
+      showToast("Please enter the M-Pesa number");
       return;
     }
     console.log("[DEBUG] submitMpesaCode called. Code:", code, "lastOrderId:", lastOrderId);
