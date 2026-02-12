@@ -563,9 +563,15 @@
                 renderOrders(data.orders || []);
             } catch (err) {
                 console.error('Failed to load orders:', err);
-                showToast('Failed to load orders');
             }
         }
+
+        // Auto-refresh orders every 5 seconds
+        setInterval(() => {
+            if (document.getElementById('orders-view').classList.contains('active')) {
+                loadOrders();
+            }
+        }, 5000);
 
         function renderOrders(orders) {
             const tbody = document.getElementById('orders-body');
