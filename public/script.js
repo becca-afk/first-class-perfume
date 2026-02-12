@@ -469,6 +469,9 @@
 
           const whatsappUrl = "https://wa.me/" + adminPhone + "?text=" + encodeURIComponent(message);
 
+          // Start polling for payment status
+          monitorPaymentStatus(orderId);
+
           // Show Success View
           lastOrderId = orderId;
           document.getElementById("cart-items-list").hidden = true;
