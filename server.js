@@ -251,6 +251,35 @@ app.post("/api/auth/register", (req, res) => {
   }
 });
 
+// Admin: Update Order Status
+app.post("/api/admin/order/:id/status", (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    const ordersFile = path.join(__dirname, "data", "orders.json");
+    if (!fs.existsSync(ordersFile)) return res.status(404).json({ success: false, message: "Orders file not found" });
+
+    const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
+    const orderIndex = ordersData.orders.findIndex(o => String(o.id) === String(id));
+
+    if (orderIndex === -1) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    ordersData.orders[orderIndex].status = status;
+    ordersData.orders[orderIndex].updatedAt = new Date().toISOString();
+
+    fs.writeFileSync(ordersFile, JSON.stringify(ordersData, null, 2));
+
+    console.log(`Order ${id} status updated to: ${status}`);
+    res.json({ success: true, message: "Status updated" });
+  } catch (error) {
+    console.error("Error updating status:", error);
+    res.status(500).json({ success: false, message: "Failed to update status" });
+  }
+});
+
 // User Login
 app.post("/api/auth/login", (req, res) => {
   const { email, password } = req.body || {};
