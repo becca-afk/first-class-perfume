@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const API = { products: "/api/products", order: "/api/order", mpesa: "/api/mpesa/request", ratings: "/api/ratings" };
+  const API = { products: "/api/products", order: "/api/order", ratings: "/api/ratings" };
   const STORAGE_KEYS = { wishlist: "firstclass_wishlist", cart: "firstclass_cart", ratings: "firstclass_ratings" };
 
   let products = [];
@@ -394,69 +394,64 @@
       return;
     }
     var total = cart.reduce(function (s, x) { return s + (x.price || 0) * (x.qty || 1); }, 0);
-    document.getElementById("mpesa-amount").textContent = "KES " + formatNumber(total);
-    document.getElementById("mpesa-phone").value = "";
-    document.getElementById("mpesa-feedback").textContent = "";
-    document.getElementById("mpesa-feedback").className = "mpesa-feedback";
-    document.getElementById("mpesa-overlay").hidden = false;
+    document.getElementById("payment-amount").textContent = "KES " + formatNumber(total);
+    document.getElementById("card-number").value = "";
+    document.getElementById("card-expiry").value = "";
+    document.getElementById("card-cvc").value = "";
+    document.getElementById("payment-feedback").textContent = "";
+    document.getElementById("payment-overlay").hidden = false;
   }
 
-  function closeMpesa() {
-    document.getElementById("mpesa-overlay").hidden = true;
+  function closePayment() {
+    document.getElementById("payment-overlay").hidden = true;
   }
 
-  function doMpesaPay() {
-    var phone = (document.getElementById("mpesa-phone").value || "").replace(/\s/g, "");
-    var feedback = document.getElementById("mpesa-feedback");
-    if (!phone) {
-      feedback.textContent = "Enter your M-Pesa phone number (e.g. 254712345678)";
-      feedback.classList.add("error");
+  function doCardPay() {
+    var card = document.getElementById("card-number").value.replace(/\s/g, "");
+    var feedback = document.getElementById("payment-feedback");
+
+    if (card.length < 16) {
+      feedback.textContent = "Please enter a valid card number.";
       return;
     }
-    if (!/^254[17]\d{8}$/.test(phone)) {
-      feedback.textContent = "Use format 254XXXXXXXXX (e.g. 254712345678)";
-      feedback.classList.add("error");
-      return;
-    }
-    var cart = getCart();
-    var total = cart.reduce(function (s, x) { return s + (x.price || 0) * (x.qty || 1); }, 0);
-    feedback.textContent = "Sending request to your phone…";
-    feedback.classList.remove("error");
-    // Version 4.0 - Clean Restart M-Pesa Logic
-    fetch(API.mpesa, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: phone, amount: total, items: cart }),
-    })
-      .then(function (r) {
-        if (!r.ok) {
-          return r.json().then(data => { throw new Error(data.errorMessage || data.message || "Server Error " + r.status); });
-        }
-        return r.json();
+
+    feedback.textContent = "Processing payment...";
+
+    // Simulate API call for card payment
+    setTimeout(() => {
+      const cart = getCart();
+      const total = cart.reduce((s, x) => s + (x.price * x.qty), 0);
+
+      fetch(API.order, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer: { name: "Web Customer", email: "customer@example.com" }, // Simple mock
+          items: cart,
+          total: total,
+          paymentMethod: "card"
+        })
       })
-      .then(function (data) {
-        if (data.Success) {
-          feedback.textContent = data.message || "Prompt sent! Check your phone.";
-          feedback.classList.remove("error");
-          showToast("M-Pesa Prompt Sent!");
-
-          // Clear cart after success
-          setTimeout(function () {
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            feedback.textContent = "Payment Successful! Redirecting to tracking...";
+            showToast("Order #" + data.orderId + " placed!");
             setCart([]);
-            closeDrawer("cart-drawer");
-            closeMpesa();
-            showToast("Order placed successfully!");
-          }, 4000);
-        } else {
-          throw new Error(data.errorMessage || "Request failed");
-        }
-      })
-      .catch(function (err) {
-        console.error("[M-Pesa V4] Error:", err.message);
-        feedback.textContent = err.message + " (Try Hard Refresh: Ctrl+F5)";
-        feedback.classList.add("error");
-      });
+            setTimeout(() => {
+              window.location.href = "track-order.html?id=" + data.orderId;
+            }, 2000);
+          } else {
+            feedback.textContent = "Payment failed. Please try again.";
+          }
+        })
+        .catch(err => {
+          console.error("Order error:", err);
+          feedback.textContent = "Error processing order.";
+        });
+    }, 1500);
   }
+
 
   function init() {
     var intro = document.getElementById("intro");
@@ -499,11 +494,12 @@
     document.getElementById("modal-close").onclick = closeModal;
     document.getElementById("modal-backdrop").onclick = closeModal;
 
-    var mpesaOverlay = document.getElementById("mpesa-overlay");
-    if (mpesaOverlay) {
-      document.getElementById("mpesa-cancel").onclick = closeMpesa;
-      document.getElementById("mpesa-pay").onclick = doMpesaPay;
+    var paymentOverlay = document.getElementById("payment-overlay");
+    if (paymentOverlay) {
+      document.getElementById("payment-cancel").onclick = closePayment;
+      document.getElementById("payment-pay").onclick = doCardPay;
     }
+
 
     fetch(API.products)
       .then(function (r) { return r.json(); })

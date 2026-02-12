@@ -255,6 +255,30 @@ app.get("/api/user/orders/:userId", (req, res) => {
   }
 });
 
+// Get order tracking status
+app.get("/api/order/track/:id", (req, res) => {
+  const { id } = req.params;
+  try {
+    const ordersFile = path.join(__dirname, "data", "orders.json");
+    if (!fs.existsSync(ordersFile)) return res.status(404).json({ success: false, message: "No orders found" });
+
+    const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
+    const order = ordersData.orders.find(o => o.id == id);
+
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+    // Return only necessary info for tracking
+    res.json({
+      id: order.id,
+      status: order.status || "pending",
+      createdAt: order.createdAt
+    });
+  } catch (error) {
+    console.error("Tracking error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch tracking info" });
+  }
+});
+
 // Update wishlist
 app.post("/api/user/wishlist/:userId", (req, res) => {
   const { userId } = req.params;
@@ -293,131 +317,6 @@ app.post("/api/contact", (req, res) => {
   res.json({ success: true });
 });
 
-// ==========================================
-// M-PESA DARAJA API (CLEAN RESTART)
-// ==========================================
-
-const getMpesaConfig = () => {
-  const env = process.env.MPESA_ENV || "sandbox";
-  return {
-    consumerKey: process.env.MPESA_CONSUMER_KEY || "7Zus5jaGgRDF9csIAcT8THhA2aeT73gdColM6Xjyu07DGIAt",
-    consumerSecret: process.env.MPESA_CONSUMER_SECRET || "cENbJBAKXqvO7sflcN1VNy2ZLb4EaxmwGczOlaziRGNJjiK77er3LkggNEKG2xRs",
-    shortCode: process.env.MPESA_SHORTCODE || "174379",
-    passkey: process.env.MPESA_PASSKEY || "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
-    env: env,
-    baseUrl: env === "production" ? "https://api.safaricom.co.ke" : "https://sandbox.safaricom.co.ke"
-  };
-};
-
-// 1. Get Access Token
-const getMpesaToken = async () => {
-  const config = getMpesaConfig();
-  const auth = Buffer.from(`${config.consumerKey}:${config.consumerSecret}`).toString("base64");
-
-  console.log(`[M-Pesa] Fetching token from ${config.env} environment...`);
-
-  try {
-    const response = await axios.get(`${config.baseUrl}/oauth/v1/generate?grant_type=client_credentials`, {
-      headers: { Authorization: `Basic ${auth}` }
-    });
-    return response.data.access_token;
-  } catch (error) {
-    const detail = error.response ? JSON.stringify(error.response.data) : error.message;
-    console.error("[M-Pesa] Auth Error:", detail);
-    throw new Error(`Authentication Failed: ${detail}`);
-  }
-};
-
-// 2. STK Push Route
-app.post("/api/mpesa/request", async (req, res) => {
-  const { phone, amount } = req.body || {};
-  if (!phone || !amount) return res.status(400).json({ success: false, message: "Phone and amount required" });
-
-  try {
-    const config = getMpesaConfig();
-    const token = await getMpesaToken();
-
-    // Generate Timestamp (YYYYMMDDHHmmss)
-    const timestamp = new Date().toISOString().replace(/[^0-9]/g, "").slice(0, 14);
-    const password = Buffer.from(config.shortCode + config.passkey + timestamp).toString("base64");
-
-    // Phone Normalization (0712... -> 254712...)
-    let cleanPhone = phone.replace(/\D/g, "");
-    if (cleanPhone.startsWith("0")) cleanPhone = "254" + cleanPhone.substring(1);
-    if (cleanPhone.length === 9) cleanPhone = "254" + cleanPhone;
-    if (!cleanPhone.startsWith("254")) cleanPhone = "254" + cleanPhone;
-
-    // Callback URL (Must be HTTPS for Safaricom)
-    const host = req.get('host');
-    const protocol = req.headers['x-forwarded-proto'] || 'http';
-    let callbackUrl = `${protocol}://${host}/api/mpesa/callback`;
-
-    // Fallback for local testing (Safaricom can't see localhost)
-    if (host.includes("localhost") || host.includes("127.0.0.1")) {
-      callbackUrl = "https://first-class-perfume.onrender.com/api/mpesa/callback";
-    }
-
-    console.log(`[M-Pesa] Sending Push to ${cleanPhone} (KES ${amount})`);
-
-    const data = {
-      BusinessShortCode: config.shortCode,
-      Password: password,
-      Timestamp: timestamp,
-      TransactionType: "CustomerPayBillOnline",
-      Amount: Math.round(amount),
-      PartyA: cleanPhone,
-      PartyB: config.shortCode,
-      PhoneNumber: cleanPhone,
-      CallBackURL: callbackUrl,
-      AccountReference: "FirstClassPerfume",
-      TransactionDesc: "Order Payment"
-    };
-
-    const response = await axios.post(`${config.baseUrl}/mpesa/stkpush/v1/processrequest`, data, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    console.log("[M-Pesa] Push Status:", response.data.ResponseDescription);
-    res.json({ Success: true, message: response.data.CustomerMessage, data: response.data });
-
-  } catch (error) {
-    const detail = error.response ? JSON.stringify(error.response.data) : error.message;
-    console.error("[M-Pesa] Flow Error:", detail);
-
-    let msg = "Request failed.";
-    if (error.message.includes("Authentication Failed")) msg = "Invalid API Credentials.";
-    else if (error.response && error.response.data) msg = error.response.data.errorMessage || error.response.data.ResponseDescription;
-
-    res.status(500).json({ Success: false, errorMessage: `Safaricom says: ${msg}` });
-  }
-});
-
-// 3. Callback Route
-app.post("/api/mpesa/callback", (req, res) => {
-  console.log("[M-Pesa] Callback Received:", JSON.stringify(req.body, null, 2));
-  res.json({ ResultCode: 0, ResultDesc: "Accepted" });
-});
-
-// 4. Test Configuration Route
-app.get("/api/mpesa/test", async (req, res) => {
-  const config = getMpesaConfig();
-  try {
-    const token = await getMpesaToken();
-    res.json({
-      status: "STK_READY",
-      environment: config.env,
-      shortcode: config.shortCode,
-      token_check: "Token successfully generated",
-      callback_prediction: `https://${req.get('host')}/api/mpesa/callback`
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: "CONFIG_ERROR",
-      error: err.message,
-      hint: "Check your Consumer Key and Secret in .env"
-    });
-  }
-});
 
 // Admin: Update stock
 app.post("/api/admin/update-stock", (req, res) => {

@@ -7,7 +7,7 @@ A luxury e-commerce experience for premium fragrances.
 - **Intro Animation**: Elegant brand entrance.
 - **Product Catalog**: Browsable categories (Men/Women) with real-time stock status.
 - **Wishlist & Cart**: Full shopping experience with local persistence.
-- **M-Pesa Integration**: Seamless STK Push payment integration for Kenyan customers.
+- **Order Tracking**: Jumia-style dispatch tracking for customers.
 - **Admin Dashboard**: backend management for stock updates and product additions.
 
 ## 🚀 Live Demo
@@ -27,16 +27,7 @@ To run this project on your machine:
    npm install
    ```
 
-3. **Configure Environment Variables**:
-   Create a `.env` file in the root directory and add your M-Pesa credentials:
-   ```env
-   MPESA_CONSUMER_KEY=your_key
-   MPESA_CONSUMER_SECRET=your_secret
-   MPESA_SHORTCODE=your_shortcode
-   MPESA_PASSKEY=your_passkey
-   ```
-
-4. **Start the server**:
+3. **Start the server**:
    ```bash
    npm start
    ```

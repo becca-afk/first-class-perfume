@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Your Order | First Class Perfume</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .track-container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 2rem;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .track-form {
+            margin-bottom: 2rem;
+        }
+
+        .track-form h1 {
+            font-family: var(--font-serif);
+            margin-bottom: 1rem;
+        }
+
+        .timeline {
+            position: relative;
+            margin-top: 3rem;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2.5rem;
+            opacity: 0.4;
+        }
+
+        .timeline-item.active {
+            opacity: 1;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            z-index: 1;
+        }
+
+        .timeline-item.active::before {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px var(--accent-subtle);
+        }
+
+        .timeline-content h3 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-content p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="First Class Perfume" class="logo-img" width="180" height="auto">
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="track-container">
+            <div class="track-form" id="track-form-box">
+                <h1>Track Your Order</h1>
+                <p>Enter your Order ID or Email to see the delivery status.</p>
+                <div style="margin-top: 1.5rem;">
+                    <input type="text" id="track-id" placeholder="Order ID (e.g. 1)"
+                        style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text); font-family: inherit;">
+                    <button type="button" class="btn btn-primary" id="track-btn"
+                        style="width: 100%; margin-top: 1rem;">Track Status</button>
+                </div>
+            </div>
+
+            <div id="track-result" hidden>
+                <div class="order-info"
+                    style="margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
+                    <h2 id="result-id">Order #1</h2>
+                    <p id="result-date">Placed on February 12, 2026</p>
+                </div>
+
+                <div class="timeline" id="timeline">
+                    <div class="timeline-item active" id="step-pending">
+                        <div class="timeline-content">
+                            <h3>Order Received</h3>
+                            <p>We've received your order and it's being reviewed.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item" id="step-processing">
+                        <div class="timeline-content">
+                            <h3>Processing</h3>
+                            <p>Your luxury fragrance is being carefully packed.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item" id="step-shipped">
+                        <div class="timeline-content">
+                            <h3>Dispatched</h3>
+                            <p>Your order is on its way to you! (Jumia-style Delivery)</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item" id="step-delivered">
+                        <div class="timeline-content">
+                            <h3>Delivered</h3>
+                            <p>The package has been delivered. Enjoy your scent!</p>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-outline" onclick="location.reload()"
+                    style="margin-top: 2rem;">Track Another Order</button>
+            </div>
+
+            <p id="track-error" style="color: var(--red); margin-top: 1rem;" hidden></p>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('track-btn').onclick = async function () {
+            const id = document.getElementById('track-id').value.trim();
+            const errorEl = document.getElementById('track-error');
+            const resultEl = document.getElementById('track-result');
+            const formEl = document.getElementById('track-form-box');
+
+            if (!id) return;
+
+            try {
+                const res = await fetch(`/api/order/track/${id}`);
+                if (!res.ok) throw new Error('Order not found');
+
+                const data = await res.json();
+                formEl.hidden = true;
+                resultEl.hidden = false;
+                errorEl.hidden = true;
+
+                document.getElementById('result-id').textContent = `Order #${data.id}`;
+                document.getElementById('result-date').textContent = `Placed on ${new Date(data.createdAt).toLocaleDateString()}`;
+
+                // Update timeline status
+                const steps = ['pending', 'processing', 'shipped', 'delivered'];
+                const currentIdx = steps.indexOf(data.status);
+
+                steps.forEach((step, idx) => {
+                    const el = document.getElementById(`step-${step}`);
+                    if (idx <= currentIdx) el.classList.add('active');
+                    else el.classList.remove('active');
+                });
+
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.hidden = false;
+            }
+        };
+    </script>
+</body>
+
+</html>

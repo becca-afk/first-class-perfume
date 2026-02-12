@@ -6,9 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>First Class Perfume | Luxury Fragrances & Gifts</title>
   <meta name="description"
-    content="Discover curated luxury perfumes for women and men in Kenya. Shop sophisticated golden fragrances. Pay easily with M-Pesa. Delivery available.">
-  <meta name="keywords"
-    content="perfume, luxury fragrance, kenya perfume, m-pesa perfume shop, gold jaguar perfume, first class perfume">
+    content="Discover curated luxury perfumes for women and men in Kenya. Shop sophisticated golden fragrances. Delivery available.">
+  <meta name="keywords" content="perfume, luxury fragrance, kenya perfume, gold jaguar perfume, first class perfume">
   <meta name="robots" content="index, follow">
 
   <!-- Open Graph / Facebook -->
@@ -16,7 +15,7 @@
   <meta property="og:url" content="https://firstclassperfume.com/">
   <meta property="og:title" content="First Class Perfume | Luxury Fragrances">
   <meta property="og:description"
-    content="Discover curated luxury perfumes for women and men. Shop sophisticated golden fragrances. Pay with M-Pesa.">
+    content="Discover curated luxury perfumes for women and men. Shop sophisticated golden fragrances.">
   <meta property="og:image" content="https://firstclassperfume.com/images/jaguar-3d.png">
 
   <!-- Twitter -->
@@ -56,6 +55,7 @@
           <button type="button" class="nav-link active" data-filter="all">All</button>
           <button type="button" class="nav-link" data-filter="women">Women</button>
           <button type="button" class="nav-link" data-filter="men">Men</button>
+          <a href="track-order.html" class="nav-link track-link">Track Order</a>
         </nav>
         <div class="header-actions">
           <button type="button" class="icon-btn" id="wishlist-btn" aria-label="Wishlist">
@@ -74,7 +74,7 @@
       <section class="hero luxury-hero">
         <div class="hero-content">
           <h1>Luxury Fragrances</h1>
-          <p>Curated women's and men's perfumes. Discover, wishlist, order. Pay with M-Pesa.</p>
+          <p>Curated women's and men's perfumes. Discover, wishlist, order.</p>
         </div>
       </section>
 
@@ -120,25 +120,51 @@
       </div>
     </div>
 
-    <!-- M-Pesa checkout step (inside cart or as overlay) -->
-    <div class="mpesa-overlay" id="mpesa-overlay" hidden>
-      <div class="mpesa-box">
-        <h3>Pay with M-Pesa</h3>
-        <p class="mpesa-amount" id="mpesa-amount">KES 0</p>
-        <label for="mpesa-phone">Phone number (254...)</label>
-        <input type="tel" id="mpesa-phone" placeholder="254712345678" maxlength="12">
-        <p class="mpesa-feedback" id="mpesa-feedback" role="status"></p>
-        <div class="mpesa-actions">
-          <button type="button" class="btn btn-outline" id="mpesa-cancel">Cancel</button>
-          <button type="button" class="btn btn-primary" id="mpesa-pay">Pay now</button>
+
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <!-- Card Payment Overlay -->
+    <div class="payment-overlay" id="payment-overlay" hidden>
+      <div class="payment-box">
+        <h3>Pay with Card</h3>
+        <p class="payment-amount" id="payment-amount">KES 0</p>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label for="card-number"
+            style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;">Card
+            Number</label>
+          <input type="text" id="card-number" placeholder="1234 5678 9101 1121" maxlength="19"
+            style="width: 100%; padding: 0.65rem; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px;">
         </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 1.5rem;">
+          <div class="form-group" style="flex: 1;">
+            <label for="card-expiry"
+              style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;">Expiry</label>
+            <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5"
+              style="width: 100%; padding: 0.65rem; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px;">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label for="card-cvc"
+              style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;">CVC</label>
+            <input type="text" id="card-cvc" placeholder="123" maxlength="3"
+              style="width: 100%; padding: 0.65rem; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px;">
+          </div>
+        </div>
+
+        <p class="payment-feedback" id="payment-feedback" role="status"
+          style="min-height: 1.2rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--accent);"></p>
+
+        <div class="payment-actions" style="display: flex; gap: 0.75rem;">
+          <button type="button" class="btn btn-outline" id="payment-cancel" style="flex: 1;">Cancel</button>
+          <button type="button" class="btn btn-primary" id="payment-pay" style="flex: 1;">Pay Now</button>
+        </div>
+
         <div style="margin-top: 15px; font-size: 11px; opacity: 0.6; text-align: center;">
-          <a href="/api/mpesa/test" target="_blank" style="color: inherit;">Check M-Pesa Connection (v4.0.1)</a>
+          <p>Secure Card Payment via MockGate 🔒</p>
         </div>
       </div>
     </div>
-
-    <div id="toast" class="toast" aria-live="polite"></div>
 
     <footer class="footer">
       <div class="container">

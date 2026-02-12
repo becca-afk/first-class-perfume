@@ -832,8 +832,8 @@ a:hover {
   width: 100%;
 }
 
-/* M-Pesa overlay */
-.mpesa-overlay {
+/* Payment overlay */
+.payment-overlay {
   position: fixed;
   inset: 0;
   z-index: 250;
@@ -845,11 +845,11 @@ a:hover {
   backdrop-filter: blur(4px);
 }
 
-.mpesa-overlay[hidden] {
+.payment-overlay[hidden] {
   display: none;
 }
 
-.mpesa-box {
+.payment-box {
   width: 100%;
   max-width: 360px;
   padding: 1.75rem;
@@ -859,58 +859,45 @@ a:hover {
   box-shadow: var(--shadow);
 }
 
-.mpesa-box h3 {
+.payment-box h3 {
   margin: 0 0 0.5rem;
   font-family: var(--font-serif);
   font-size: 1.35rem;
 }
 
-.mpesa-amount {
+.payment-amount {
   margin: 0 0 1rem;
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--accent);
 }
 
-.mpesa-box label {
-  display: block;
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  margin-bottom: 0.35rem;
-}
-
-.mpesa-box input {
-  width: 100%;
-  padding: 0.65rem 0.75rem;
-  margin-bottom: 0.75rem;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text);
-  font-family: inherit;
-  font-size: 1rem;
-}
-
-.mpesa-feedback {
+.payment-feedback {
   min-height: 1.5rem;
   margin: 0 0 1rem;
   font-size: 0.9rem;
   color: var(--accent);
 }
 
-.mpesa-feedback.error {
+.payment-feedback.error {
   color: #ef5777;
-  /* Soft red for visibility */
 }
 
-.mpesa-actions {
+.payment-actions {
   display: flex;
   gap: 0.75rem;
 }
 
-.mpesa-actions .btn {
+.payment-actions .btn {
   flex: 1;
 }
+
+/* Tracking Link */
+.track-link {
+  color: var(--accent) !important;
+  font-weight: 500 !important;
+}
+
 
 /* Modal star rating */
 .modal-body .stars-wrap {
