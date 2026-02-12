@@ -501,6 +501,14 @@
             }
         }
 
+        // Auto-refresh orders every 30 seconds
+        setInterval(() => {
+            const activeTab = document.querySelector('.tab-btn.active');
+            if (activeTab && activeTab.textContent.includes('Orders')) {
+                loadOrders();
+            }
+        }, 30000);
+
         function renderOrders(orders) {
             const list = document.getElementById('orders-list');
             if (orders.length === 0) {
@@ -512,11 +520,14 @@
                 const itemsStr = o.items.map(i => `${i.name} (${i.qty})`).join(', ');
                 const statusClass = `status-${o.status}`;
 
+                const isNew = (new Date() - new Date(o.createdAt)) < 600000; // 10 minutes
+                const newBadge = isNew ? '<span style="background: var(--accent); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-left: 8px; font-weight: 600; text-transform: uppercase;">NEW</span>' : '';
+
                 return `
                     <div class="order-card">
                         <div class="order-header">
                             <div>
-                                <span class="order-id">#${o.id}</span>
+                                <span class="order-id">#${o.id}${newBadge}</span>
                                 <div class="order-date">${new Date(o.createdAt).toLocaleString()}</div>
                             </div>
                             <span class="status-badge ${statusClass}">${o.status}</span>

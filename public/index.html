@@ -55,7 +55,6 @@
           <button type="button" class="nav-link active" data-filter="all">All</button>
           <button type="button" class="nav-link" data-filter="women">Women</button>
           <button type="button" class="nav-link" data-filter="men">Men</button>
-          <a href="track-order.html" class="nav-link track-link">Track Order</a>
         </nav>
         <div class="header-actions">
           <button type="button" class="icon-btn" id="wishlist-btn" aria-label="Wishlist">
@@ -152,38 +151,14 @@
                   style="color: var(--accent); font-size: 2.5rem; font-family: monospace; display: block;">#------</strong>
               </div>
 
-              <div id="payment-status-container"
-                style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; background: var(--bg-elevated); border: 1px dashed var(--accent);">
-                <p style="font-size: 0.8rem; margin-bottom: 0.5rem; color: var(--text-muted);">Payload Status:</p>
-                <strong id="live-payment-status" style="font-size: 1.2rem; color: var(--orange);">Waiting for
-                  Confirmation...</strong>
-                <div id="payment-loader" class="loader" style="margin: 0.5rem auto;"></div>
-              </div>
 
               <div id="success-order-summary"
                 style="margin-bottom: 1.5rem; text-align: left; background: var(--bg); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
                 <!-- Items injected by script -->
               </div>
 
-              <div class="payment-instructions"
-                style="background: var(--bg-elevated); padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; text-align: left;">
-                <p style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--accent);">PAYMENT
-                  INSTRUCTIONS:</p>
-                <p style="font-size: 0.8rem; margin-bottom: 0.25rem;">1. Send <strong id="success-total">KES 0</strong>
-                  via M-Pesa</p>
-                <p style="font-size: 0.8rem; margin-bottom: 0.25rem;">2. Send to: <strong>0729 072 269</strong> (Owner)
-                </p>
-                <p style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.75rem; font-style: italic;">
-                  *Safaricom transaction fees may apply.</p>
-                <p style="font-size: 0.8rem; margin-bottom: 0.75rem;">3. Confirm the <strong>M-Pesa Number</strong> you
-                  paid from:</p>
-
-                <div class="form-group" style="margin-bottom: 0.5rem;">
-                  <input type="tel" id="mpesa-code" placeholder="E.g. 0712 345 678">
-                </div>
-                <button type="button" class="btn btn-primary" id="submit-mpesa-btn"
-                  style="width: 100%; padding: 0.5rem;">Confirm & Continue</button>
-              </div>
+              <p style="font-size: 0.9rem; margin-bottom: 1rem; color: var(--text-muted);">Please complete your payment
+                via M-Pesa to <strong>0729 072 269</strong> then click below to confirm everything on WhatsApp:</p>
 
               <p style="font-size: 0.8rem; margin-bottom: 1rem;">Finally, click below to confirm everything on WhatsApp:
               </p>

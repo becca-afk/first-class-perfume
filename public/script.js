@@ -464,14 +464,13 @@
                           </li></ul>`;
 
           message += "\nTotal: KES " + formatNumber(total) + "\n";
-          message += "\nDelivery to:\n" + location + "\n";
-          message += "\nRecipient: " + name + " (" + phone + ")\n";
-          message += "\nPlease let me know how to pay via M-Pesa.";
+          message += "\nDelivery Details:\n";
+          message += "📍 Location: " + location + "\n";
+          message += "👤 Recipient: " + name + "\n";
+          message += "📞 Contact: " + phone + "\n";
+          message += "\nPlease confirm my order. I am ready to pay via M-Pesa.";
 
           const whatsappUrl = "https://wa.me/" + adminPhone + "?text=" + encodeURIComponent(message);
-
-          // Start polling for payment status
-          monitorPaymentStatus(orderId);
 
           // Show Success View
           lastOrderId = orderId;
@@ -482,13 +481,8 @@
 
           document.getElementById("success-order-id").textContent = "#" + orderId;
           document.getElementById("success-total").textContent = "KES " + formatNumber(total);
-          document.getElementById("success-order-id").textContent = "#" + orderId;
-          document.getElementById("success-total").textContent = "KES " + formatNumber(total);
           document.getElementById("whatsapp-redirect-btn").href = whatsappUrl;
           document.getElementById("success-order-summary").innerHTML = summaryHtml;
-
-          // Pre-fill the payment number with the phone number they just used
-          document.getElementById("mpesa-code").value = phone;
 
           setCart([]);
         } else {
@@ -501,87 +495,6 @@
       });
   }
 
-  function submitMpesaCode() {
-    const code = document.getElementById("mpesa-code").value.trim().toUpperCase();
-    if (!code) {
-      showToast("Please enter the M-Pesa number");
-      return;
-    }
-    console.log("[DEBUG] submitMpesaCode called. Code:", code, "lastOrderId:", lastOrderId);
-    const btn = document.getElementById("submit-mpesa-btn");
-    btn.disabled = true;
-    btn.textContent = "Submitting...";
-
-    fetch("/api/order/" + lastOrderId + "/transaction", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transactionId: code })
-    })
-      .then(r => {
-        console.log("[DEBUG] Server response status:", r.status);
-        return r.json();
-      })
-      .then(res => {
-        console.log("[DEBUG] Server response body:", res);
-        if (res.success) {
-          showToast("Code submitted! Thank you.");
-          btn.textContent = "Submitted ✓";
-
-          try {
-            // Update WhatsApp message
-            const waBtn = document.getElementById("whatsapp-redirect-btn");
-            if (waBtn.href && waBtn.href !== "#") {
-              const currentUrl = new URL(waBtn.href);
-              let text = decodeURIComponent(currentUrl.searchParams.get("text") || "");
-              if (text && !text.includes(code)) {
-                text += "\n\nPaid from M-Pesa Number: " + code;
-                waBtn.href = "https://wa.me/" + currentUrl.pathname.substring(1) + "?text=" + encodeURIComponent(text);
-                console.log("[DEBUG] Updated WhatsApp URL with phone number");
-              }
-            }
-          } catch (urlErr) {
-            console.error("Error updating WhatsApp URL:", urlErr);
-          }
-        } else {
-          showToast("Error: " + (res.message || "Could not save code"));
-          btn.disabled = false;
-          btn.textContent = "Submit Code";
-        }
-      })
-      .catch(err => {
-        console.error("[DEBUG] Code submission fetch error:", err);
-        showToast("Connection error.");
-        btn.disabled = false;
-        btn.textContent = "Submit Code";
-      });
-  }
-
-  function monitorPaymentStatus(orderId) {
-    const statusEl = document.getElementById("live-payment-status");
-    const loader = document.getElementById("payment-loader");
-
-    if (!statusEl) return;
-
-    const poller = setInterval(() => {
-      if (document.getElementById("order-success-view").hidden) {
-        clearInterval(poller);
-        return;
-      }
-
-      fetch("/api/order/" + orderId + "/status")
-        .then(r => r.json())
-        .then(res => {
-          if (res.status === 'processing' || res.status === 'shipped' || res.status === 'delivered') {
-            statusEl.textContent = "PAYMENT RECEIVED! ✓";
-            statusEl.style.color = "var(--green)";
-            if (loader) loader.style.display = "none";
-            clearInterval(poller);
-            showToast("Payment Confirmed by Admin!");
-          }
-        })
-        .catch(err => console.error("Polling error:", err));
-    }, 4000);
-  }
 
   function closeSuccess() {
     closeDrawer("cart-drawer");
@@ -636,7 +549,6 @@
     document.getElementById("checkout-btn").onclick = checkout;
     document.getElementById("back-to-cart").onclick = backToCart;
     document.getElementById("confirm-order-btn").onclick = confirmOrder;
-    document.getElementById("submit-mpesa-btn").onclick = submitMpesaCode;
     document.getElementById("success-close-btn").onclick = closeSuccess;
 
     document.getElementById("modal-close").onclick = closeModal;
