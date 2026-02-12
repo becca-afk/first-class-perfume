@@ -392,15 +392,19 @@
   function checkout() {
     document.getElementById("cart-items-list").hidden = true;
     document.getElementById("checkout-form-view").hidden = false;
+    document.getElementById("order-success-view").hidden = true;
     document.getElementById("checkout-btn").hidden = true;
     document.getElementById("confirm-order-btn").hidden = false;
+    document.getElementById("footer-total-row").hidden = false;
   }
 
   function backToCart() {
     document.getElementById("cart-items-list").hidden = false;
     document.getElementById("checkout-form-view").hidden = true;
+    document.getElementById("order-success-view").hidden = true;
     document.getElementById("checkout-btn").hidden = false;
     document.getElementById("confirm-order-btn").hidden = true;
+    document.getElementById("footer-total-row").hidden = false;
   }
 
   function confirmOrder() {
@@ -416,7 +420,7 @@
 
     const total = cart.reduce(function (s, x) { return s + (x.price || 0) * (x.qty || 1); }, 0);
 
-    showToast("Generating Order ID...");
+    showToast("Generating Order...");
 
     fetch(API.order, {
       method: "POST",
@@ -448,14 +452,16 @@
 
           const whatsappUrl = "https://wa.me/" + adminPhone + "?text=" + encodeURIComponent(message);
 
-          showToast("Order Created! Redirecting to WhatsApp...");
-          setCart([]);
-          backToCart();
-          closeDrawer("cart-drawer");
+          // Show Success View
+          document.getElementById("cart-items-list").hidden = true;
+          document.getElementById("checkout-form-view").hidden = true;
+          document.getElementById("order-success-view").hidden = false;
+          document.getElementById("cart-footer").hidden = true;
 
-          setTimeout(() => {
-            window.location.href = whatsappUrl;
-          }, 1500);
+          document.getElementById("success-order-id").textContent = "#" + orderId;
+          document.getElementById("whatsapp-redirect-btn").href = whatsappUrl;
+
+          setCart([]);
         } else {
           showToast("Order failed. Please try again.");
         }
@@ -464,6 +470,19 @@
         console.error("Order error:", err);
         showToast("Error connecting to server.");
       });
+  }
+
+  function closeSuccess() {
+    closeDrawer("cart-drawer");
+    // Reset views for next time
+    setTimeout(() => {
+      document.getElementById("cart-items-list").hidden = false;
+      document.getElementById("checkout-form-view").hidden = true;
+      document.getElementById("order-success-view").hidden = true;
+      document.getElementById("cart-footer").hidden = false;
+      document.getElementById("checkout-btn").hidden = false;
+      document.getElementById("confirm-order-btn").hidden = true;
+    }, 500);
   }
 
 
@@ -506,6 +525,7 @@
     document.getElementById("checkout-btn").onclick = checkout;
     document.getElementById("back-to-cart").onclick = backToCart;
     document.getElementById("confirm-order-btn").onclick = confirmOrder;
+    document.getElementById("success-close-btn").onclick = closeSuccess;
 
     document.getElementById("modal-close").onclick = closeModal;
     document.getElementById("modal-backdrop").onclick = closeModal;
