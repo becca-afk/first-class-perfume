@@ -90,9 +90,19 @@ app.post("/api/order", async (req, res) => {
       ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
     }
 
+    // Create unique random order ID
+    let orderId;
+    let isUnique = false;
+    while (!isUnique) {
+      orderId = Math.floor(100000 + Math.random() * 900000); // 6-digit random
+      if (!ordersData.orders.some(o => o.id == orderId)) {
+        isUnique = true;
+      }
+    }
+
     // Create new order
     const newOrder = {
-      id: ordersData.nextOrderId++,
+      id: orderId,
       customer: customer || { name: "Guest", email: "guest@example.com" },
       items,
       total,
