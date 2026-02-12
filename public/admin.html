@@ -339,7 +339,7 @@
                             <th>Customer</th>
                             <th>Phone</th>
                             <th>Location</th>
-                            <th>Payment Proof</th>
+                            <th>Paid From (M-Pesa)</th>
                             <th>Items</th>
                             <th>Total</th>
                             <th>Status</th>
@@ -579,7 +579,7 @@
             <td>${escapeHtml(customerName)}</td>
             <td>${escapeHtml(o.phone || '-')}</td>
             <td><small>${escapeHtml(o.shippingAddress || '-')}</small></td>
-            <td><span style="font-family: monospace; color: var(--accent); font-weight: 600;" title="M-Pesa Code or Name">${escapeHtml(o.transactionId || '-')}</span></td>
+            <td><span style="font-family: monospace; color: var(--accent); font-weight: 600;" title="M-Pesa Number used for payment">${escapeHtml(o.transactionId || '-')}</span></td>
             <td style="font-size: 0.8rem;">${escapeHtml(items)}</td>
             <td>KES ${o.total.toLocaleString()}</td>
             <td><span class="stock-value ${o.status === 'delivered' ? 'ok' : o.status === 'shipped' ? 'orange' : 'low'}">${o.status}</span></td>
