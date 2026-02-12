@@ -398,6 +398,8 @@
     document.getElementById("footer-total-row").hidden = false;
   }
 
+  var lastOrderId = null;
+
   function backToCart() {
     document.getElementById("cart-items-list").hidden = false;
     document.getElementById("checkout-form-view").hidden = true;
@@ -453,13 +455,16 @@
           const whatsappUrl = "https://wa.me/" + adminPhone + "?text=" + encodeURIComponent(message);
 
           // Show Success View
+          lastOrderId = orderId;
           document.getElementById("cart-items-list").hidden = true;
           document.getElementById("checkout-form-view").hidden = true;
           document.getElementById("order-success-view").hidden = false;
           document.getElementById("cart-footer").hidden = true;
 
           document.getElementById("success-order-id").textContent = "#" + orderId;
+          document.getElementById("success-total").textContent = "KES " + formatNumber(total);
           document.getElementById("whatsapp-redirect-btn").href = whatsappUrl;
+          document.getElementById("mpesa-code").value = "";
 
           setCart([]);
         } else {
@@ -469,6 +474,47 @@
       .catch(err => {
         console.error("Order error:", err);
         showToast("Error connecting to server.");
+      });
+  }
+
+  function submitMpesaCode() {
+    const code = document.getElementById("mpesa-code").value.trim().toUpperCase();
+    if (!code) {
+      showToast("Please enter the M-Pesa code");
+      return;
+    }
+    if (!lastOrderId) {
+      showToast("No active order found");
+      return;
+    }
+
+    showToast("Submitting code...");
+
+    fetch("/api/order/" + lastOrderId + "/transaction", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transactionId: code })
+    })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          showToast("Code submitted! Thank you.");
+          document.getElementById("submit-mpesa-btn").disabled = true;
+          document.getElementById("submit-mpesa-btn").textContent = "Submitted ✓";
+
+          // Update WhatsApp message to include the code if they haven't sent it yet
+          const btn = document.getElementById("whatsapp-redirect-btn");
+          const currentUrl = new URL(btn.href);
+          const text = decodeURIComponent(currentUrl.searchParams.get("text"));
+          const newText = text + "\n\nMy M-Pesa Code is: " + code;
+          btn.href = "https://wa.me/" + currentUrl.pathname.substring(1) + "?text=" + encodeURIComponent(newText);
+        } else {
+          showToast("Error: " + (res.message || "Could not save code"));
+        }
+      })
+      .catch(err => {
+        console.error("Code error:", err);
+        showToast("Connection error.");
       });
   }
 
@@ -525,6 +571,7 @@
     document.getElementById("checkout-btn").onclick = checkout;
     document.getElementById("back-to-cart").onclick = backToCart;
     document.getElementById("confirm-order-btn").onclick = confirmOrder;
+    document.getElementById("submit-mpesa-btn").onclick = submitMpesaCode;
     document.getElementById("success-close-btn").onclick = closeSuccess;
 
     document.getElementById("modal-close").onclick = closeModal;

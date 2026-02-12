@@ -135,17 +135,37 @@
             </div>
           </div>
           <div id="order-success-view" hidden>
-            <div class="success-content" style="text-align: center; padding: 2rem 0;">
-              <div class="success-icon" style="font-size: 3rem; color: var(--green); margin-bottom: 1rem;">✓</div>
-              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 0.5rem;">Order Placed!</h3>
-              <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Your Order ID is <strong id="success-order-id"
-                  style="color: var(--accent); font-size: 1.2rem;">#0</strong></p>
-              <p style="font-size: 0.9rem; margin-bottom: 2rem;">Please message us on WhatsApp to coordinate your
-                payment and delivery.</p>
-              <a href="#" id="whatsapp-redirect-btn" class="btn btn-primary"
-                style="display: block; text-decoration: none;">Chat on WhatsApp</a>
+            <div class="success-content" style="text-align: center; padding: 1rem 0;">
+              <div class="success-icon" style="font-size: 2.5rem; color: var(--green); margin-bottom: 0.5rem;">✓</div>
+              <h3 style="font-family: var(--font-serif); font-size: 1.3rem; margin-bottom: 0.25rem;">Order Placed!</h3>
+              <p style="color: var(--text-muted); margin-bottom: 1rem;">Order ID: <strong id="success-order-id"
+                  style="color: var(--accent);">#0</strong></p>
+
+              <div class="payment-instructions"
+                style="background: var(--bg-elevated); padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; text-align: left;">
+                <p style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--accent);">PAYMENT
+                  INSTRUCTIONS:</p>
+                <p style="font-size: 0.8rem; margin-bottom: 0.25rem;">1. Send <strong id="success-total">KES 0</strong>
+                  via M-Pesa</p>
+                <p style="font-size: 0.8rem; margin-bottom: 0.25rem;">2. Send to: <strong>0729 072 269</strong> (Owner)
+                </p>
+                <p style="font-size: 0.8rem; margin-bottom: 0.75rem;">3. Enter the M-Pesa Transaction Code below:</p>
+
+                <div class="form-group" style="margin-bottom: 0.5rem;">
+                  <input type="text" id="mpesa-code" placeholder="E.g. QX12345678" style="text-transform: uppercase;">
+                </div>
+                <button type="button" class="btn btn-primary" id="submit-mpesa-btn"
+                  style="width: 100%; padding: 0.5rem;">Submit Code</button>
+              </div>
+
+              <p style="font-size: 0.8rem; margin-bottom: 1rem;">Finally, click below to confirm everything on WhatsApp:
+              </p>
+              <a href="#" id="whatsapp-redirect-btn" class="btn btn-outline"
+                style="display: block; text-decoration: none; border-color: #25D366; color: #25D366;">Confirm via
+                WhatsApp</a>
               <button type="button" class="btn btn-outline" id="success-close-btn"
-                style="margin-top: 1rem; width: 100%;">Close Drawer</button>
+                style="margin-top: 1.5rem; width: 100%; border: none; font-size: 0.75rem; color: var(--text-muted);">Return
+                to Home</button>
             </div>
           </div>
         </div>

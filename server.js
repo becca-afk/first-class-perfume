@@ -164,6 +164,39 @@ app.put("/api/admin/orders/:orderId", authMiddleware, (req, res) => {
   }
 });
 
+// Update order transaction code (User side)
+app.post("/api/order/:orderId/transaction", (req, res) => {
+  const { orderId } = req.params;
+  const { transactionId } = req.body;
+
+  if (!transactionId) {
+    return res.status(400).json({ success: false, message: "Transaction ID is required" });
+  }
+
+  try {
+    const ordersFile = path.join(__dirname, "data", "orders.json");
+    if (!fs.existsSync(ordersFile)) return res.status(404).json({ success: false, message: "Orders file not found" });
+
+    const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
+    const orderIndex = ordersData.orders.findIndex(o => o.id == orderId);
+
+    if (orderIndex === -1) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    ordersData.orders[orderIndex].transactionId = transactionId;
+    ordersData.orders[orderIndex].updatedAt = new Date().toISOString();
+
+    fs.writeFileSync(ordersFile, JSON.stringify(ordersData, null, 2));
+
+    console.log(`Transaction ID updated for Order ${orderId}: ${transactionId}`);
+    res.json({ success: true, message: "Transaction ID saved" });
+  } catch (error) {
+    console.error("Error updating transaction ID:", error);
+    res.status(500).json({ success: false, message: "Failed to save transaction ID" });
+  }
+});
+
 // User Registration
 app.post("/api/auth/register", (req, res) => {
   const { name, email, phone, password } = req.body || {};
