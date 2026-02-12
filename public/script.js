@@ -395,44 +395,49 @@
     }
 
     var total = cart.reduce(function (s, x) { return s + (x.price || 0) * (x.qty || 1); }, 0);
-    showToast("Processing order...");
 
-    // Create order in backend for tracking
-    fetch(API.order, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        items: cart,
-        total: total,
-        paymentMethod: "whatsapp_manual",
-        customer: { name: "WhatsApp Customer", email: "manual@example.com" }
-      })
-    })
-      .then(r => r.json())
-      .then(res => {
-        if (res.success) {
-          var orderId = res.orderId;
-          var message = "Hello First Class Perfume! I'd like to complete my order #" + orderId + ".\n\nItems:\n";
-          cart.forEach(item => {
-            message += "- " + item.name + " (x" + item.qty + ") - KES " + (item.price * item.qty).toLocaleString() + "\n";
-          });
-          message += "\nTotal: KES " + total.toLocaleString() + "\n\nPlease let me know how to pay.";
+    // Flutterwave Real Payment Integration
+    FlutterwaveCheckout({
+      public_key: "FLWPUBK_TEST-REPLACE_ME", // Placeholder - Need real key
+      tx_ref: "FCP-" + Date.now(),
+      amount: total,
+      currency: "KES",
+      payment_options: "card, mpesa",
+      customer: {
+        email: "customer@firstclassperfume.com", // Will be updated to real email if collected
+        name: "First Class Customer",
+      },
+      customizations: {
+        title: "First Class Perfume",
+        description: "Payment for luxury fragrances",
+        logo: "https://firstclassperfume.com/images/logo.png",
+      },
+      callback: function (data) {
+        if (data.status === "successful") {
+          showToast("Payment Successful! Processing order...");
 
-          var whatsappUrl = "https://wa.me/254712345678?text=" + encodeURIComponent(message); // Placeholder phone
-
-          showToast("Order placed! Redirecting to WhatsApp...");
-          setCart([]);
-          setTimeout(() => {
-            window.location.href = whatsappUrl;
-          }, 1500);
-        } else {
-          showToast("Error processing order. Please try again.");
+          fetch(API.order, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              items: cart,
+              total: total,
+              paymentMethod: "flutterwave",
+              transactionId: data.transaction_id,
+              customer: { name: "Web Customer", email: "customer@example.com" }
+            })
+          })
+            .then(r => r.json())
+            .then(res => {
+              setCart([]);
+              window.location.href = "track-order.html?id=" + res.orderId;
+            });
         }
-      })
-      .catch(err => {
-        console.error("Checkout error:", err);
-        showToast("Connection error. Please try again.");
-      });
+      },
+      onclose: function () {
+        console.log("Payment window closed");
+      }
+    });
   }
 
 
