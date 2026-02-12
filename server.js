@@ -476,6 +476,27 @@ app.post("/api/admin/update-stock", (req, res) => {
   }
 });
 
+// Admin: Delete product
+app.post("/api/admin/delete-product", (req, res) => {
+  const { productId } = req.body || {};
+  const file = path.join(__dirname, "data", "products.json");
+
+  try {
+    const products = JSON.parse(fs.readFileSync(file, "utf-8"));
+    const updatedProducts = products.filter(p => p.id !== productId);
+
+    if (products.length === updatedProducts.length) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    fs.writeFileSync(file, JSON.stringify(updatedProducts, null, 2));
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Delete product error:", error);
+    res.status(500).json({ success: false, message: "Failed to delete product" });
+  }
+});
+
 // Admin: Add new product
 app.post("/api/admin/add-product", (req, res) => {
   const { name, category, price, desc, stock } = req.body || {};
