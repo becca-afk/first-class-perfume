@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple Stock Manager - First Class Perfume</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400&family=Montserrat:wght@300;400;500&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --bg: #f8f9fa;
@@ -18,7 +21,7 @@
             --warning: #ffc107;
             --danger: #dc3545;
             --border: #dee2e6;
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         * {
@@ -252,7 +255,9 @@
             color: var(--text);
         }
 
-        .form-group input, .form-group select, .form-group textarea {
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             padding: 0.75rem;
             border: 1px solid var(--border);
             border-radius: 6px;
@@ -302,17 +307,18 @@
                 grid-template-columns: 1fr;
                 gap: 0.5rem;
             }
-            
+
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>🌸 First Class Perfume Stock Manager</h1>
-        
+
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number" id="total-products">0</div>
@@ -388,7 +394,7 @@
         function loadProducts() {
             document.getElementById('loading').style.display = 'block';
             document.getElementById('productsGrid').style.display = 'none';
-            
+
             fetch('/api/products')
                 .then(response => response.json())
                 .then(data => {
@@ -409,7 +415,7 @@
             grid.innerHTML = products.map(product => {
                 const stockClass = product.stock === 0 ? 'stock-out' : product.stock < 5 ? 'stock-low' : 'stock-good';
                 const stockLabel = product.stock === 0 ? 'Out' : product.stock < 5 ? 'Low' : 'Good';
-                
+
                 return `
                     <div class="product-card">
                         <div>
@@ -445,33 +451,36 @@
         function updateStock(productId, change) {
             fetch(`${API}/update-stock`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + btoa('admin:admin123')
+                },
                 body: JSON.stringify({ productId, change })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const product = products.find(p => p.id === productId);
-                    if (product) {
-                        product.stock = Math.max(0, product.stock + change);
-                        renderProducts();
-                        updateStats();
-                        showToast('Stock updated successfully!');
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const product = products.find(p => p.id === productId);
+                        if (product) {
+                            product.stock = Math.max(0, product.stock + change);
+                            renderProducts();
+                            updateStats();
+                            showToast('Stock updated successfully!');
+                        }
+                    } else {
+                        showToast('Failed to update stock', 'error');
                     }
-                } else {
-                    showToast('Failed to update stock', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error updating stock:', error);
-                showToast('Error updating stock', 'error');
-            });
+                })
+                .catch(error => {
+                    console.error('Error updating stock:', error);
+                    showToast('Error updating stock', 'error');
+                });
         }
 
         function toggleAddProduct() {
             const form = document.getElementById('addProductForm');
             form.classList.toggle('show');
-            
+
             if (form.classList.contains('show')) {
                 document.getElementById('newProductName').focus();
             } else {
@@ -501,24 +510,27 @@
 
             fetch(`${API}/add-product`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + btoa('admin:admin123')
+                },
                 body: JSON.stringify({ name, category, price, desc, stock })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    clearAddProductForm();
-                    toggleAddProduct();
-                    loadProducts(); // Reload all products
-                    showToast('New product added successfully!');
-                } else {
-                    showToast('Failed to add product: ' + (data.message || 'Unknown error'), 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error adding product:', error);
-                showToast('Error adding product', 'error');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        clearAddProductForm();
+                        toggleAddProduct();
+                        loadProducts(); // Reload all products
+                        showToast('New product added successfully!');
+                    } else {
+                        showToast('Failed to add product: ' + (data.message || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding product:', error);
+                    showToast('Error adding product', 'error');
+                });
         }
 
         function showToast(message, type = 'success') {
@@ -526,7 +538,7 @@
             toast.textContent = message;
             toast.style.background = type === 'error' ? 'var(--danger)' : 'var(--success)';
             toast.classList.add('show');
-            
+
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
@@ -539,4 +551,5 @@
         }
     </script>
 </body>
+
 </html>
