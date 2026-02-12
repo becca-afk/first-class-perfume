@@ -555,6 +555,33 @@
       });
   }
 
+  function monitorPaymentStatus(orderId) {
+    const statusEl = document.getElementById("live-payment-status");
+    const loader = document.getElementById("payment-loader");
+
+    if (!statusEl) return;
+
+    const poller = setInterval(() => {
+      if (document.getElementById("order-success-view").hidden) {
+        clearInterval(poller);
+        return;
+      }
+
+      fetch("/api/order/" + orderId + "/status")
+        .then(r => r.json())
+        .then(res => {
+          if (res.status === 'processing' || res.status === 'shipped' || res.status === 'delivered') {
+            statusEl.textContent = "PAYMENT RECEIVED! ✓";
+            statusEl.style.color = "var(--green)";
+            if (loader) loader.style.display = "none";
+            clearInterval(poller);
+            showToast("Payment Confirmed by Admin!");
+          }
+        })
+        .catch(err => console.error("Polling error:", err));
+    }, 4000);
+  }
+
   function closeSuccess() {
     closeDrawer("cart-drawer");
     // Reset views for next time
