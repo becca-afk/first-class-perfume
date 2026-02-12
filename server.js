@@ -251,6 +251,26 @@ app.post("/api/auth/register", (req, res) => {
   }
 });
 
+// Create endpoint for checking status
+app.get("/api/order/:id/status", (req, res) => {
+  try {
+    const { id } = req.params;
+    const ordersFile = path.join(__dirname, "data", "orders.json");
+    if (!fs.existsSync(ordersFile)) return res.json({ status: 'pending' });
+
+    const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
+    const order = ordersData.orders.find(o => String(o.id) === String(id));
+
+    if (order) {
+      res.json({ status: order.status });
+    } else {
+      res.json({ status: 'pending' });
+    }
+  } catch (err) {
+    res.json({ status: 'pending' });
+  }
+});
+
 // Admin: Update Order Status
 app.post("/api/admin/order/:id/status", (req, res) => {
   const { id } = req.params;
