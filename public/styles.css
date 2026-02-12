@@ -832,6 +832,66 @@ a:hover {
   width: 100%;
 }
 
+.checkout-form {
+  padding: 0.5rem 0;
+}
+
+.checkout-form h3 {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem;
+  color: var(--text);
+}
+
+.checkout-form .form-help {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--text-muted);
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  transition: border-color var(--transition);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.empty-cart-msg {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 /* Payment overlay */
 .payment-overlay {
   position: fixed;

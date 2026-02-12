@@ -317,8 +317,14 @@
     const total = cart.reduce(function (sum, x) { return sum + (x.price || 0) * (x.qty || 1); }, 0);
     document.getElementById("cart-count").textContent = count;
     document.getElementById("cart-total").textContent = "KES " + formatNumber(total);
-    const body = document.getElementById("cart-body");
-    body.innerHTML = "";
+    const listContainer = document.getElementById("cart-items-list");
+    listContainer.innerHTML = "";
+    if (cart.length === 0) {
+      listContainer.innerHTML = '<div class="empty-cart-msg">Your cart is empty.</div>';
+      document.getElementById("checkout-btn").disabled = true;
+    } else {
+      document.getElementById("checkout-btn").disabled = false;
+    }
     cart.forEach(function (item) {
       var imgSrc = imageUrl(item);
       var fallback = perfumeBottleSvg(item.name, 56, 56);
@@ -328,9 +334,9 @@
         '<div class="thumb"><img src="' + imgSrc + '" alt="" onerror="this.onerror=null;this.src=\'' + fallback + '\'"></div>' +
         '<div><div class="name">' + escapeHtml(item.name) + "</div><div class=\"price\">KES " + formatNumber(item.price) + " \u00D7 " + (item.qty || 1) + "</div></div>" +
         '<button type="button" class="remove" data-cart-id="' + escapeHtml(item.id) + '">&times;</button>';
-      body.appendChild(el);
+      listContainer.appendChild(el);
     });
-    body.querySelectorAll(".remove").forEach(function (btn) {
+    listContainer.querySelectorAll(".remove").forEach(function (btn) {
       btn.onclick = function () {
         const id = btn.dataset.cartId;
         let cart = getCart().filter(function (x) { return x.id !== id; });
@@ -384,56 +390,80 @@
   }
 
   function checkout() {
-    var cart = getCart();
-    if (cart.length === 0) {
-      showToast("Cart is empty");
+    document.getElementById("cart-items-list").hidden = true;
+    document.getElementById("checkout-form-view").hidden = false;
+    document.getElementById("checkout-btn").hidden = true;
+    document.getElementById("confirm-order-btn").hidden = false;
+  }
+
+  function backToCart() {
+    document.getElementById("cart-items-list").hidden = false;
+    document.getElementById("checkout-form-view").hidden = true;
+    document.getElementById("checkout-btn").hidden = false;
+    document.getElementById("confirm-order-btn").hidden = true;
+  }
+
+  function confirmOrder() {
+    const name = document.getElementById("customer-name").value.trim();
+    const phone = document.getElementById("customer-phone").value.trim();
+    const location = document.getElementById("customer-location").value.trim();
+    const cart = getCart();
+
+    if (!name || !phone || !location) {
+      showToast("Please fill in all details");
       return;
     }
 
-    var total = cart.reduce(function (s, x) { return s + (x.price || 0) * (x.qty || 1); }, 0);
+    const total = cart.reduce(function (s, x) { return s + (x.price || 0) * (x.qty || 1); }, 0);
 
-    // Flutterwave Real Payment Integration
-    FlutterwaveCheckout({
-      public_key: "FLWPUBK_TEST-REPLACE_ME", // Placeholder - Need real key
-      tx_ref: "FCP-" + Date.now(),
-      amount: total,
-      currency: "KES",
-      payment_options: "card, mpesa",
-      customer: {
-        email: "customer@firstclassperfume.com", // Will be updated to real email if collected
-        name: "First Class Customer",
-      },
-      customizations: {
-        title: "First Class Perfume",
-        description: "Payment for luxury fragrances",
-        logo: "https://firstclassperfume.com/images/logo.png",
-      },
-      callback: function (data) {
-        if (data.status === "successful") {
-          showToast("Payment Successful! Processing order...");
+    showToast("Generating Order ID...");
 
-          fetch(API.order, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              items: cart,
-              total: total,
-              paymentMethod: "flutterwave",
-              transactionId: data.transaction_id,
-              customer: { name: "Web Customer", email: "customer@example.com" }
-            })
-          })
-            .then(r => r.json())
-            .then(res => {
-              setCart([]);
-              window.location.href = "track-order.html?id=" + res.orderId;
-            });
+    fetch(API.order, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customer: { name: name, email: "manual@example.com" },
+        items: cart,
+        total: total,
+        paymentMethod: "WhatsApp (Manual)",
+        phone: phone,
+        shippingAddress: location
+      })
+    })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          const orderId = res.orderId;
+          const adminPhone = "254712345678"; // Replace with real admin phone
+
+          let message = "Hello First Class Perfume! I'd like to complete my order #" + orderId + ".\n\n";
+          message += "Product Details:\n";
+          cart.forEach(item => {
+            message += "- " + item.name + " (x" + item.qty + ") - KES " + formatNumber(item.price * item.qty) + "\n";
+          });
+          message += "\nTotal: KES " + formatNumber(total) + "\n";
+          message += "\nDelivery to:\n" + location + "\n";
+          message += "\nRecipient: " + name + " (" + phone + ")\n";
+          message += "\nPlease let me know how to pay via M-Pesa.";
+
+          const whatsappUrl = "https://wa.me/" + adminPhone + "?text=" + encodeURIComponent(message);
+
+          showToast("Order Created! Redirecting to WhatsApp...");
+          setCart([]);
+          backToCart();
+          closeDrawer("cart-drawer");
+
+          setTimeout(() => {
+            window.location.href = whatsappUrl;
+          }, 1500);
+        } else {
+          showToast("Order failed. Please try again.");
         }
-      },
-      onclose: function () {
-        console.log("Payment window closed");
-      }
-    });
+      })
+      .catch(err => {
+        console.error("Order error:", err);
+        showToast("Error connecting to server.");
+      });
   }
 
 
@@ -474,6 +504,8 @@
     document.getElementById("cart-close").onclick = function () { closeDrawer("cart-drawer"); };
     document.getElementById("cart-backdrop").onclick = function () { closeDrawer("cart-drawer"); };
     document.getElementById("checkout-btn").onclick = checkout;
+    document.getElementById("back-to-cart").onclick = backToCart;
+    document.getElementById("confirm-order-btn").onclick = confirmOrder;
 
     document.getElementById("modal-close").onclick = closeModal;
     document.getElementById("modal-backdrop").onclick = closeModal;

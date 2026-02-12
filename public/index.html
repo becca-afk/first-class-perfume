@@ -31,7 +31,6 @@
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <script src="https://checkout.flutterwave.com/v3.js"></script>
 </head>
 
 <body>
@@ -113,10 +112,33 @@
           <h2>Cart</h2>
           <button type="button" class="drawer-close" id="cart-close" aria-label="Close">&times;</button>
         </div>
-        <div class="drawer-body" id="cart-body"></div>
+        <div class="drawer-body" id="cart-content-view">
+          <div id="cart-items-list"></div>
+          <div id="checkout-form-view" hidden>
+            <div class="checkout-form">
+              <h3>Delivery Details</h3>
+              <p class="form-help">Enter your details to generate your Order ID.</p>
+              <div class="form-group">
+                <label for="customer-name">Full Name</label>
+                <input type="text" id="customer-name" placeholder="E.g. Jane Doe">
+              </div>
+              <div class="form-group">
+                <label for="customer-phone">M-Pesa Number</label>
+                <input type="tel" id="customer-phone" placeholder="0712 345 678">
+              </div>
+              <div class="form-group">
+                <label for="customer-location">Delivery Location</label>
+                <textarea id="customer-location" placeholder="E.g. Estate, House No, or Town"></textarea>
+              </div>
+              <button type="button" class="btn btn-outline" id="back-to-cart"
+                style="margin-top: 1rem; width: 100%;">Back to Cart</button>
+            </div>
+          </div>
+        </div>
         <div class="drawer-footer" id="cart-footer">
           <p class="cart-total">Total: <strong id="cart-total">KES 0</strong></p>
-          <button type="button" class="btn btn-primary" id="checkout-btn">Checkout</button>
+          <button type="button" class="btn btn-primary" id="checkout-btn">Proceed to Checkout</button>
+          <button type="button" class="btn btn-primary" id="confirm-order-btn" hidden>Order via WhatsApp</button>
         </div>
       </div>
     </div>
