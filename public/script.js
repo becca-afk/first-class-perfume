@@ -412,12 +412,11 @@
   function confirmOrder() {
     const name = document.getElementById("customer-name").value.trim();
     const phone = document.getElementById("customer-phone").value.trim();
-    const email = document.getElementById("customer-email").value.trim();
     const location = document.getElementById("customer-location").value.trim();
     const cart = getCart();
 
-    if (!name || !phone || !email || !location) {
-      showToast("Please fill in all details");
+    if (!name || !phone || !location) {
+      showToast("Please fill in name, phone, and location");
       return;
     }
 
@@ -429,7 +428,7 @@
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        customer: { name: name, email: email },
+        customer: { name: name, email: "no-email@provided.com" },
         items: cart,
         total: total,
         paymentMethod: "WhatsApp (Manual)",
