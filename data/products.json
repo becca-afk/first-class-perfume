@@ -406,13 +406,5 @@
     "desc": "Bold Confident Masculine Scent",
     "category": "men",
     "stock": 8
-  },
-  {
-    "id": "t1",
-    "name": "M-Pesa Test Sample",
-    "price": 5,
-    "desc": "A budget test item for verifying M-Pesa payments.",
-    "category": "women",
-    "stock": 100
   }
 ]
