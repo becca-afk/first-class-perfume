@@ -480,7 +480,7 @@
           document.getElementById("cart-footer").hidden = true;
 
           // document.getElementById("success-order-id").textContent = "#" + orderId; // No longer showing ID
-          document.getElementById("success-total").textContent = "KES " + formatNumber(total);
+          // document.getElementById("success-total").textContent = "KES " + formatNumber(total); // Removed to fix crash
           document.getElementById("whatsapp-redirect-btn").href = whatsappUrl;
           console.log("[DEBUG] WhatsApp URL set successfully");
           document.getElementById("success-order-summary").innerHTML = summaryHtml;
