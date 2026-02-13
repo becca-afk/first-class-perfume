@@ -1,7 +1,7 @@
 services:
   # Web Service
   - type: web
-    name: firstclass-perfume
+    name: first-class-perfume
     env: node
     plan: free
     buildCommand: "npm install"
