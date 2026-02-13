@@ -443,7 +443,7 @@
           const orderId = res.orderId;
           const adminPhone = "254729072269"; // Owner's WhatsApp number
 
-          let message = "Hello First Class Perfume! I'd like to complete my order #" + orderId + ".\n\n";
+          let message = "Hello First Class Perfume! I'd like to place an order.\n\n";
           message += "Product Details:\n";
 
           let summaryHtml = '<h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Order Summary:</h4><ul style="list-style: none; padding: 0; margin: 0;">';
@@ -479,13 +479,19 @@
           document.getElementById("order-success-view").hidden = false;
           document.getElementById("cart-footer").hidden = true;
 
-          document.getElementById("success-order-id").textContent = "#" + orderId;
+          // document.getElementById("success-order-id").textContent = "#" + orderId; // No longer showing ID
           document.getElementById("success-total").textContent = "KES " + formatNumber(total);
           document.getElementById("whatsapp-redirect-btn").href = whatsappUrl;
           console.log("[DEBUG] WhatsApp URL set successfully");
           document.getElementById("success-order-summary").innerHTML = summaryHtml;
 
           setCart([]);
+
+          // ASAP Redirection
+          showToast("Redirecting to WhatsApp...");
+          setTimeout(() => {
+            window.location.href = whatsappUrl;
+          }, 800);
         } else {
           showToast("Order failed. Please try again.");
         }
