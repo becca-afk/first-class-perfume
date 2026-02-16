@@ -578,5 +578,19 @@ app.post("/api/ratings", (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+
+  // Keep-alive: ping the server every 14 minutes to prevent Render free tier from sleeping
+  // This prevents customers from seeing the "APPLICATION LOADING" screen
+  if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
+    const RENDER_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+    const PING_INTERVAL = 14 * 60 * 1000; // 14 minutes (Render sleeps after ~15 min inactivity)
+
+    setInterval(() => {
+      axios.get(`${RENDER_URL}/api/products`)
+        .then(() => console.log(`[Keep-Alive] Pinged at ${new Date().toISOString()}`))
+        .catch(err => console.log(`[Keep-Alive] Ping failed: ${err.message}`));
+    }, PING_INTERVAL);
+
+    console.log(`[Keep-Alive] Auto-ping enabled every 14 minutes to prevent sleep`);
+  }
 });
-// Force rebuild

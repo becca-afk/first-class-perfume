@@ -517,8 +517,25 @@
 
 
   function init() {
-    // Intro screen removed - site loads directly
-    document.body.classList.add("body-intro-done");
+    var intro = document.getElementById("intro");
+    var introBrand = document.getElementById("intro-brand-text");
+    var introEnter = document.getElementById("intro-enter-btn");
+    var siteMain = document.getElementById("site-main");
+    if (intro && introBrand && introEnter && siteMain) {
+      introBrand.classList.add("pop");
+      introEnter.onclick = function () {
+        intro.classList.add("done");
+        document.body.classList.add("body-intro-done");
+        siteMain.setAttribute("aria-hidden", "false");
+        setTimeout(function () {
+          intro.setAttribute("aria-hidden", "true");
+        }, 900);
+      };
+      setTimeout(function () { introEnter.focus(); }, 8000);
+    } else {
+      document.body.classList.add("body-intro-done");
+      if (siteMain) siteMain.setAttribute("aria-hidden", "false");
+    }
 
     document.querySelectorAll(".nav-link").forEach(function (link) {
       link.onclick = function () {
