@@ -6,6 +6,29 @@ const fs = require("fs");
 const axios = require("axios");
 require("dotenv").config();
 
+const os = require('os');
+const tmpDir = os.tmpdir();
+function getDataFile(filename) {
+  const isCloud = process.env.GAE_ENV || process.env.GOOGLE_CLOUD_PROJECT || process.env.VERCEL;
+  if (!isCloud) return path.join(__dirname, 'data', filename);
+  
+  const tmpFile = path.join(tmpDir, filename);
+  const origFile = path.join(__dirname, 'data', filename);
+  
+  if (!fs.existsSync(tmpFile)) {
+    if (fs.existsSync(origFile)) {
+      try { fs.copyFileSync(origFile, tmpFile); } catch(e){}
+    } else {
+      try {
+        if (filename === 'orders.json') fs.writeFileSync(tmpFile, JSON.stringify({orders:[],nextOrderId:1}));
+        else if (filename === 'users.json') fs.writeFileSync(tmpFile, JSON.stringify({users:[],nextUserId:1}));
+      } catch(e){}
+    }
+  }
+  return tmpFile;
+}
+
+
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
@@ -80,7 +103,7 @@ app.get("/", (req, res) => {
 let orders = [];
 
 app.get("/api/products", (req, res) => {
-  const file = path.join(__dirname, "data", "products.json");
+  const file = getDataFile("products.json");
   if (!fs.existsSync(file)) return res.json([]);
   res.json(JSON.parse(fs.readFileSync(file, "utf-8")));
 });
@@ -94,7 +117,7 @@ app.post("/api/order", async (req, res) => {
 
   try {
     // Load existing orders
-    const ordersFile = path.join(__dirname, "data", "orders.json");
+    const ordersFile = getDataFile("orders.json");
     let ordersData = { orders: [], nextOrderId: 1 };
     if (fs.existsSync(ordersFile)) {
       ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
@@ -140,7 +163,7 @@ app.post("/api/order", async (req, res) => {
 // Get all orders (admin only)
 app.get("/api/admin/orders", authMiddleware, (req, res) => {
   try {
-    const ordersFile = path.join(__dirname, "data", "orders.json");
+    const ordersFile = getDataFile("orders.json");
     if (!fs.existsSync(ordersFile)) return res.json({ orders: [] });
 
     const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
@@ -161,7 +184,7 @@ app.put("/api/admin/orders/:orderId", authMiddleware, (req, res) => {
   }
 
   try {
-    const ordersFile = path.join(__dirname, "data", "orders.json");
+    const ordersFile = getDataFile("orders.json");
     if (!fs.existsSync(ordersFile)) return res.status(404).json({ success: false, message: "Orders file not found" });
 
     const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
@@ -194,7 +217,7 @@ app.post("/api/order/:orderId/transaction", (req, res) => {
   }
 
   try {
-    const ordersFile = path.join(__dirname, "data", "orders.json");
+    const ordersFile = getDataFile("orders.json");
     if (!fs.existsSync(ordersFile)) return res.status(404).json({ success: false, message: "Orders file not found" });
 
     const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
@@ -226,7 +249,7 @@ app.post("/api/auth/register", (req, res) => {
   }
 
   try {
-    const usersFile = path.join(__dirname, "data", "users.json");
+    const usersFile = getDataFile("users.json");
     let usersData = { users: [], nextUserId: 1 };
     if (fs.existsSync(usersFile)) {
       usersData = JSON.parse(fs.readFileSync(usersFile, "utf-8"));
@@ -265,7 +288,7 @@ app.post("/api/auth/register", (req, res) => {
 app.get("/api/order/:id/status", (req, res) => {
   try {
     const { id } = req.params;
-    const ordersFile = path.join(__dirname, "data", "orders.json");
+    const ordersFile = getDataFile("orders.json");
     if (!fs.existsSync(ordersFile)) return res.json({ status: 'pending' });
 
     const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
@@ -287,7 +310,7 @@ app.post("/api/admin/order/:id/status", (req, res) => {
   const { status } = req.body;
 
   try {
-    const ordersFile = path.join(__dirname, "data", "orders.json");
+    const ordersFile = getDataFile("orders.json");
     if (!fs.existsSync(ordersFile)) return res.status(404).json({ success: false, message: "Orders file not found" });
 
     const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
@@ -323,7 +346,7 @@ app.post("/api/admin/order/:id/alert", (req, res) => {
   const { message } = req.body;
 
   try {
-    const ordersFile = path.join(__dirname, "data", "orders.json");
+    const ordersFile = getDataFile("orders.json");
     const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
     const order = ordersData.orders.find(o => String(o.id) === String(id));
 
@@ -345,7 +368,7 @@ app.post("/api/auth/login", (req, res) => {
   }
 
   try {
-    const usersFile = path.join(__dirname, "data", "users.json");
+    const usersFile = getDataFile("users.json");
     if (!fs.existsSync(usersFile)) return res.status(401).json({ success: false, message: "Invalid credentials" });
 
     const usersData = JSON.parse(fs.readFileSync(usersFile, "utf-8"));
@@ -369,7 +392,7 @@ app.get("/api/user/orders/:userId", (req, res) => {
   const { userId } = req.params;
 
   try {
-    const ordersFile = path.join(__dirname, "data", "orders.json");
+    const ordersFile = getDataFile("orders.json");
     if (!fs.existsSync(ordersFile)) return res.json({ orders: [] });
 
     const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
@@ -388,7 +411,7 @@ app.get("/api/user/orders/:userId", (req, res) => {
 app.get("/api/order/track/:id", (req, res) => {
   const { id } = req.params;
   try {
-    const ordersFile = path.join(__dirname, "data", "orders.json");
+    const ordersFile = getDataFile("orders.json");
     if (!fs.existsSync(ordersFile)) return res.status(404).json({ success: false, message: "No orders found" });
 
     const ordersData = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
@@ -420,7 +443,7 @@ app.post("/api/user/wishlist/:userId", (req, res) => {
   }
 
   try {
-    const usersFile = path.join(__dirname, "data", "users.json");
+    const usersFile = getDataFile("users.json");
     if (!fs.existsSync(usersFile)) return res.status(404).json({ success: false, message: "User not found" });
 
     const usersData = JSON.parse(fs.readFileSync(usersFile, "utf-8"));
@@ -452,7 +475,7 @@ app.post("/api/contact", (req, res) => {
 // Admin: Update stock
 app.post("/api/admin/update-stock", (req, res) => {
   const { productId, change, stock } = req.body || {};
-  const file = path.join(__dirname, "data", "products.json");
+  const file = getDataFile("products.json");
 
   try {
     const products = JSON.parse(fs.readFileSync(file, "utf-8"));
@@ -479,7 +502,7 @@ app.post("/api/admin/update-stock", (req, res) => {
 // Admin: Delete product
 app.post("/api/admin/delete-product", (req, res) => {
   const { productId } = req.body || {};
-  const file = path.join(__dirname, "data", "products.json");
+  const file = getDataFile("products.json");
 
   try {
     const products = JSON.parse(fs.readFileSync(file, "utf-8"));
@@ -500,7 +523,7 @@ app.post("/api/admin/delete-product", (req, res) => {
 // Admin: Add new product
 app.post("/api/admin/add-product", (req, res) => {
   const { name, category, price, desc, stock } = req.body || {};
-  const file = path.join(__dirname, "data", "products.json");
+  const file = getDataFile("products.json");
 
   if (!name || !category || !price || !desc || stock === undefined) {
     return res.status(400).json({ success: false, message: "Missing required fields" });
@@ -576,6 +599,7 @@ app.post("/api/ratings", (req, res) => {
 
 
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 
