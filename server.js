@@ -88,8 +88,8 @@ app.get("/api/products", (req, res) => {
 app.post("/api/order", async (req, res) => {
   const { customer, items, total, paymentMethod, phone, shippingAddress, transactionId } = req.body || {};
 
-  if (!items || !total || !paymentMethod) {
-    return res.status(400).json({ success: false, message: "Missing required order information" });
+  if (!items || typeof total !== 'number' || !paymentMethod) {
+    return res.status(400).json({ success: false, message: "Missing required order information. items=" + !!items + " total=" + total });
   }
 
   try {

@@ -492,7 +492,7 @@
             window.location.href = whatsappUrl;
           }, 800);
         } else {
-          showToast("Order failed. Please try again.");
+          showToast("Order failed: " + (res.message || "Please try again."));
         }
       })
       .catch(err => {
